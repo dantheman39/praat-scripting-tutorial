@@ -1,0 +1,12 @@
+{
+  "name": "praatscripting",
+  "version": "1.0.0",
+  "description": "Praat Scripting Tutorial Website",
+  "main": "index.js",
+  "author": "Daniel Riggs <daniel.riggs1@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "nunjucks": "^3.2.3"
+  }
+}
