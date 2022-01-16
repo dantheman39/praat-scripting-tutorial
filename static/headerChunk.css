@@ -1,0 +1,86 @@
+#headline {
+
+	background-color: black;
+	min-height: 100px;
+	margin: 0;
+	padding:0;
+
+}
+
+#headerH1 {
+	color: yellow;
+	/* no idea why this gets 
+	rid of a white border at the
+	top */
+	display: inline-block;
+	padding-top: 20px;
+	padding-left: 2%;
+}
+
+div#navDiv {
+
+	visibility: hidden;
+	background-color: black;
+	padding-bottom: 8px;
+	position: absolute;
+	right:0px;
+	text-align: right;
+	top: 100px;	
+	z-index:1
+}
+
+img#menuImage {
+
+	height: 75px;
+	padding-right: 10px;
+}
+
+div > div#menuButton {
+
+	position: absolute;
+	top: 10px;
+	right: 0px;
+	/*float:right;*/
+	/*padding-top: 10px;*/
+	
+
+}
+
+nav a {
+
+	display: block;
+	text-decoration: none;
+	padding-top: 10px;
+	padding-right: 10px;
+	padding-left: 10px;
+	font-size: 16pt;
+	color: yellow;
+
+}
+
+nav > a:visited {
+
+	color: white;
+	padding-bottom: 20px;
+
+}
+
+@media (min-width: 343px) and (max-width: 470px) {
+
+	#headerH1 {
+		max-width: 300px;
+		padding-top: 0px;
+	}
+
+}
+
+@media (max-width: 342px) {
+	#headerH1 {
+		max-width: 100px;
+		padding-top: 0px;
+	}
+
+	div#navDiv {
+		top: 120px;
+	}
+}

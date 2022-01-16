@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ title }}</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+
+	<div id="menuButton">
+
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+
+	</div>
+
+	<div id="navDiv">
+	<nav>
+		{% for page in navPages %}
+			{% with 'praatScripting/'|add:page.name as pagePath %}
+		<a href="{{ page.name }}">{{ page.human }}</a>
+			{% endwith %}
+		{% endfor %}
+	</nav>
+	</div>
+
+</div>
