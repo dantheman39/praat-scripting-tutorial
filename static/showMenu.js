@@ -1,13 +1,10 @@
-$('#menuImage').click(function() {
-	console.log("Been clicked, y'all");
+const menuImg = document.getElementById("menuImage");
 
-	if ($("#navDiv").css('visibility') == 'hidden') {
-
-		$('#navDiv').css('visibility', 'visible');
-
+menuImg.onclick = function() {
+    const navDiv = document.getElementById("navDiv");
+    if (navDiv.style.visibility === "hidden") {
+    	navDiv.style.visibility = "visible";
 	} else {
-
-		$('#navDiv').css('visibility', 'hidden');
-
+    	navDiv.style.visibility = "hidden";
 	}
-});
+};

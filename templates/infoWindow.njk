@@ -1,0 +1,135 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Basics: Praat Windows, opening scripts, comments</h1>
+
+<h2>Introduction</h2>
+
+<p>Welcome! Click on the menu in the top right to see the topics covered in this tutorial. Click <a href="default">here</a> to read the complete introduction.</p>
+
+<h2>Other languages</h2>
+
+<p><strong>Português:</strong> Se achar que muitas pessoas leriam este site se fosse em português, me avise, e talvez o traduza. Se tiver qualquer dúvida em português, fala aí!</p>
+
+<p><strong>Español:</strong> Si crees que mucha gente leería este tutorial si fuera en español, avísame, y tal vez lo traduzco. Si tienes alguna duda, puedes escribirme en español.</p>
+
+<p>If you speak <strong>Catalan</strong>, <strong>French</strong> or <strong>Italian</strong> and have a question, feel free to write me in your language. <strong>Chinese</strong> would take some work, but is a possibility :)</p>
+
+<h2>Update your version of Praat</h2>
+
+<p>Let's get some basics out of the way. First, install Praat! If you haven't updated Praat in a while (as in, in the last year), download the latest stable version. The Praat developers are constantly addressing bugs, and they've also made some big improvements to their scripting language. If you're using an out of date version of Praat, parts of this tutorial might not work.</p> 
+
+<h2>Praat Windows</h2>
+
+<p>Open Praat. Unless you've tinkered with it, Praat should open the "Object Window" and the "Picture Window". Click on the object window to bring it into focus. Note the available dropdown menus on top bar (Praat, New, Open, Save, Help). Click on the Picture window, and note that the available dropdown menus on the top bar are now different. When it's three in the morning and you're tired and find yourself screaming "Where the f*#$ is the open Praat script command?!?!", click on a different window, try again, and when you find it scream "Winnebago!" It'll be our little inside joke.</p>
+
+<p>Now we're going to open a Scripting window. With the Object window focused, in the "Praat" top bar dropdown menu click "New Praat Script". The window that opens is the scripting window. It's essentially a very simple text editor. Click on all of the top bar dropdown menus, and say "Hmmph" when you see something and you don't know what it is. The next time you're sitting with your phone in front of you and you're about to kill time on social media, try to look up what those things are instead. To be a successful programmer you will need to feed your curiosity and hone your Google-Fu. Your curiosity will lead you to new ways of tackling problems that you wouldn't have thought up on your own.</p>
+
+<p>So back to the scripting window. Type this command (type, don't copy paste!):</p>
+
+<pre>
+<code class="language-ruby">
+appendInfoLine: "Boo!"
+</code>
+</pre>
+
+<p>Run this by going to Run &gt; Run, or better yet, by clicking Ctrl + R on Windows or Linux, or ⌘ + R on Mac.</p>
+
+<p>If you typed everything correctly, the Info window should have popped up and tried to scare you. You have just written your first Praat script! If you mistyped something, you would have gotten some type of error message. This is totally normal. You will constantly generate errors, but when you practice typing things in (that's why you don't copy and paste), you will gradually get better at paying attention to every little detail and typing carefully, like in this case the colon, and the enclosing quotes around the word "Boo!". All of these little details (can) matter when you program, and paying great attention to detail will serve you well.</p>
+
+<p>So back to the Info window. This is going to be your primary mode of interacting with Praat scripts. When your script is doing something you don't like, you can start "printing" the values of things to the Info window and see where you're going wrong. Let's add another line to our script, and run it again. We'll talk more about what is happening with the equal sign and everything, so for now just type it in exactly and run it.</p>
+
+<pre>
+<code class="language-ruby">
+appendInfoLine: "Boo!"
+favoriteNumber = 8
+appendInfoLine: favoriteNumber
+</code>
+</pre>
+
+<p>Check out the info window again. Now it should say this:</p>
+
+<pre>
+<code class="language-markup">
+Boo!
+Boo!
+8
+</code>
+</pre>
+
+<p>There are a couple of things to note here. Firstly, unless there's an error, the info window only prints information we tell it to (it only printed after the appendInfoLine command. The line 'favoriteNumber = 8' didn't print anything). Secondly, the info window now says Boo! twice. This is because the command "appendInfoLine" appends things to the info window: it adds a line to whatever is already there (the first Boo! is from the first time we ran the script). You could clear it by selecting File &gt; Clear. When you start making longer scripts and runnning them, this can actually get kind of annoying and the window will start to fill up with old messages. Add "clearinfo" to the top of the script, and run it again:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+appendInfoLine: "Boo!"
+favoriteNumber = 8
+appendInfoLine: favoriteNumber
+</code>
+</pre>
+
+<p>Now every time we run this script the info window will be cleared first. I put it at the top of nearly all of my scripts, personally.</p>
+
+<p>There is another detail in the way I typed the script above. Hopefully, your burgeoning programmatic curiosity has led you to note that there is a blank line between the first and second line of code (which is now on the third line of the script), and yet the code ran without issues. Praat's language allows for blank lines, and we should use them to separate our code into logical blocks, so that we can more easily read it. This is a short example so it doesn't seem like a big deal, but once you get longer scripts this will become important, and we should develop good habits now. I would format this script like this:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+appendInfoLine: "Boo!"
+
+favoriteNumber = 8
+appendInfoLine: favoriteNumber
+</code>
+</pre>
+
+<p>Note that whitespace before a line (spaces or tabs) is also allowed, and we'll talk later about when to use it to make your code more human-readable.</p>
+
+<p>There's one last thing that we should talk about before moving on. Put a hashtag in front of line 5 as below, and run it.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+appendInfoLine: "Boo!"
+
+#favoriteNumber = 8
+appendInfoLine: favoriteNumber
+</code>
+</pre>
+
+<p>Whoops! That generated an error. Praat is complaining that there is no variable named 'favoriteNumber'. That's because the hashtag is Praat's "comment" character. Any line that begins with it will be ignored by the program. You might be thinking that's really stupid, but it's not. We can use the comments to write little messages to our future selves. We should tell ourselves what we're trying to do so that we can quickly understand a script in the future, and we can also quickly comment out "appendInfoLine" commands that are cluttering up our info window in long scripts. Below is a better example of using the comment character.</p>
+
+<pre>
+<code class="language-ruby">
+###############################
+# This is my first Praat script.
+# It's totally useless.
+
+#clear old messages in the info window 
+clearinfo
+
+appendInfoLine: "Boo!"
+
+favoriteNumber = 8
+appendInfoLine: favoriteNumber
+</code>
+</pre>
+
+<p>When you make longer scripts, you can include more helpful messages, like "#This script expects a wav file and a TextGrid with the same name. It reads the first tier of the TextGrid, which needs to be an interval tier." The text grid of interest should have an interval tier". Or you can outline your thinking for a complex problem.</p>
+
+<p>Save the script by going to File &gt; Save. I recommend saving your praat scripts with the extension ".praat". I'll tell you why later. But it's really just a text file, so "txt", or even no extension at all, will work. I recommend creating a folder where you will store all of your Praat scripts, so you can get a little library going. In the future, you could open this script and run it by going to Praat &gt; Open Praat Script.</p>
+
+<h2>Summary</h2>
+
+<p>This may have seemed a very simple lesson to some and hopefully you're not already bored, but we actually learned some very important things. We learned about the different Praat windows, how to open and save a script, we learned how to print messages to the Info Window, we learned a little about formatting and also about the comment character. I recommend completing the following exercises, which are short and sweet.</p>
+
+<h2>Exercises</h2>
+
+<p>1. appendInfoLine is not the only command available. Go to Praat's manual and find other commands for writing to the info window, and understand the difference between them. (Go to Help &gt; Scripting Tutorial, and search for Info Window. In my version it's in the Scripting tutorial 6.2.). The Praat manual should become your primary resource for learning about Praat scripting.</p>
+
+<p>2. Make a script where Praat tells you it loves you. Save it and keep it for hard times.</p>
+
+{% include "templates/_footer.njk" %}

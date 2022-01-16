@@ -3,7 +3,7 @@ resource "aws_s3_bucket" "bucket" {
   acl    = "public-read"
 
   website {
-    index_document = "index.html"
+    index_document = "infoWindow.html"
   }
 }
 
@@ -32,11 +32,11 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 resource "aws_s3_bucket_object" "html" {
-  for_each = fileset("../templates/", "*.html")
+  for_each = fileset("../html/", "*.html")
   bucket = aws_s3_bucket.bucket.id
   key = each.value
-  source = "../templates/${each.value}"
-  etag = filemd5("../templates/${each.value}")
+  source = "../html/${each.value}"
+  etag = filemd5("../html/${each.value}")
   content_type = "text/html"
 }
 
