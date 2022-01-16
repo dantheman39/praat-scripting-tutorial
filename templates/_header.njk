@@ -21,12 +21,12 @@
 		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
 	</div>
 
-	<div id="navDiv">
-	<nav>
-		{% for page in navPages %}
-            <a href="{{ page.name }}">{{ page.human }}</a>
-		{% endfor %}
-	</nav>
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            {% for page in navPages %}
+                <a href="{{ page.name }}">{{ page.human }}</a>
+            {% endfor %}
+        </nav>
 	</div>
 
 </div>

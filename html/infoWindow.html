@@ -2,39 +2,32 @@
 
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Jameson</title>
 
-    <link rel="stylesheet" type="text/css" href="/static/prism.css" />
-    <link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
-    <link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/prism.js"></script>
+	<script type="text/javascript" src="/static/prism.js"></script>
 </head>
 
 <body>
 
 <div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
 
-    <h1 id="headerH1">Praat scripting tutorial</h1>
-
-    <div id="menuButton">
-
-        <img id= "menuImage" src="/images/threeBarMenuButton.svg">
-
-    </div>
-
-    <div id="navDiv">
+	<div id="navDiv" style="visibility:hidden">
         <nav>
-            {% for page in navPages %}
-            {% with 'praatScripting/'|add:page.name as pagePath %}
-            <a href="{{ page.name }}">{{ page.human }}</a>
-            {% endwith %}
-            {% endfor %}
+            
+                <a href="page1">Page 1</a>
+            
         </nav>
-    </div>
+	</div>
 
 </div>
 
@@ -171,7 +164,7 @@ appendInfoLine: favoriteNumber
 
 <p>2. Make a script where Praat tells you it loves you. Save it and keep it for hard times.</p>
 
-    <p>Next page: <a href="{{ nextPage }}">{{ human }}</a></p>
+<p>Next page: <a href="nextPage">Next Page</a></p>
 
 </div>
 
@@ -179,13 +172,13 @@ appendInfoLine: favoriteNumber
 
 <!--
 <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-78683807-1', 'auto');
-    ga('send', 'pageview');
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
 
 </script>
 -->
