@@ -6,7 +6,12 @@
   "author": "Daniel Riggs <daniel.riggs1@gmail.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "start": "node index.js && node devServer.js",
+    "build": "node index.js"
+  },
   "dependencies": {
+    "express": "^4.17.2",
     "nunjucks": "^3.2.3"
   }
 }
