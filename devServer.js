@@ -7,6 +7,7 @@ const port = process.env.PORT || 8000;
 
 app.use(express.static("static"));
 app.use(express.static("images"));
+app.use(express.static("downloads"));
 
 app.get("*", (req, res) => {
     // A ghetto little server to dev with.

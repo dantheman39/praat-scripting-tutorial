@@ -66,3 +66,12 @@ resource "aws_s3_bucket_object" "svg" {
   etag = filemd5("../images/${each.value}")
   content_type = "image/svg+xml"
 }
+
+resource "aws_s3_bucket_object" "zip" {
+  for_each = fileset("../downloads/", "*.zip")
+  bucket = aws_s3_bucket.bucket.id
+  key = "downloads/${each.value}"
+  source = "../downloads/${each.value}"
+  etag = filemd5("../downloads/${each.value}")
+  content_type = "application/zip"
+}
