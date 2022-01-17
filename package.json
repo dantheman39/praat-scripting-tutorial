@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Praat Scripting Tutorial Website",
   "author": "Daniel Riggs <daniel.riggs1@gmail.com>",
-  "license": "MIT",
+  "license": "Creative Commons Attribution 4.0",
   "private": true,
   "scripts": {
     "start": "nodemon --ext js,css,njk index.js",
