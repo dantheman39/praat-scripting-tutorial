@@ -30,9 +30,9 @@ quick development.
 
 ### Install Node
 
-I was using the LTS 16.13.2.
+I was using the LTS 16.13.2, for the record, but hopefully that won't matter too much.
 
-### Install yarn
+### Install yarn (or use npm instead)
 
 ### Install dependencies
 
@@ -46,20 +46,13 @@ Go to `localhost:8000` and you can see the site.
 
 See `package.json::scripts::start` for what the start command does. In short, it
 will read the templates in `templates/`, and output them to `html/`.
-The files in `html/` are not meant to be edited by hand.
+The files in `html/` are not meant to be edited by hand. A very naïve `express`
+server will serve the files, and `nodemon` watches for changes (though you'll have
+to refresh your browser to view them).
 
 See `package.json::scripts` for other available scripts.
 
-As you make changes, the `nodemon` package will rerun the dev script whenever you
-save a relevant file.
-
 ## Deploying
 
-To push changes to the website, hosted in AWS S3, run terraform.
-
-You'll need AWS credentials for my account.
-
-cd into the terraform folder.
-
-`terraform init`
-`terraform apply`
+I deploy this to my AWS account using terraform. At time of writing no one except
+me has credentials to push to my account.
