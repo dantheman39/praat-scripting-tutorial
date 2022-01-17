@@ -23,8 +23,8 @@
 
 	<div id="navDiv" style="visibility:hidden">
         <nav>
-            {% for page in navPages %}
-                <a href="{{ page.name }}">{{ page.human }}</a>
+            {% for page in pageData %}
+                <a href="{{ page.name }}">{{ page.humanName }}</a>
             {% endfor %}
         </nav>
 	</div>
