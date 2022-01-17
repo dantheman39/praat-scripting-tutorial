@@ -1,0 +1,465 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Procedures: avoid repetitive code</h1>
+
+<p>An important concept in coding is what fancy people call "encapsulation". Someone correct me if I'm wrong, but I take this term to basically mean that you should strive to write code that can be broken into smaller independent pieces. This can greatly simplify the logic of a larger task, and give you less to think about when fixing bugs. If done well, you can reuse these chunks of code in later projects with little to no effort.</p>
+
+<p>Let's say I want to find out the extension of a given file. Wouldn't it be great if I could just type a command saying "getExtension"? Instead of including a bunch of lines of code in my main script, and having to make sure not to use variable names that I've already used, it would be nice if I could just write one line. This makes things easier to read, and easier to fix since the code for finding the extension would be separate.</p>
+
+<p>In Praat, we can accomplish this is with procedures, which are essentially mini-scripts. Here's the basic layout of a procedure:</p>
+
+<pre>
+<code class="language-ruby">
+procedure procedureName: .arg1, .arg2$
+
+	appendInfoLine: "The value of argument one is", .arg1
+	appendInfoLine: "The value of argument two is", .arg2$
+
+endproc
+</code>
+</pre>
+
+<p>We've just declared a procedure called "procedureName" and gave it two arguments ".arg1" and ".arg2$". All of those names are names we made up, and we decided how many arguments we wanted to provide. Also note the period before the variable names.</p>
+
+<p>If we were to run this code, nothing would happen, because we haven't "called" the procedure. Above or below the procedure, add these lines and run it:</p>
+
+<pre>
+<code class="language-ruby">
+num1 = 32
+word1$ = "cheese"
+@procedureName: num1, word1$
+@procedureName: 2, "yogurt"
+</code>
+</pre>
+
+<p>Did you notice how the variable names for the arguments that we use when calling the procedure don't have to have the same name as the one inside the procedure? In the procedure, the names were .arg1 and .arg2$, but I called it with num1 and word1$. We can use any variable name (or hard code the arguments, like 2 and "yogurt" above), and it will work fine.</p>
+
+<p>This example is of course pretty useless, but hopefully you see the potential. Instead of writing similar code multiple times (making it harder to change when you find a mistake or want to change how it works), we write the code once, and run it as many times we want using only a single line each time.</p>
+
+<p>We can put the procedure at any part of the file and it still works (but I prefer to put all procedures at the bottom of the file in Praat, and I'll tell you why later). If the procedure is well made, you can just copy-paste it into another project and it should work.</p>
+
+<h2>Example: A procedure for checking before deleting</h2>
+
+<p>Let's make something you can actually use. Something I'm sure I will be doing in the future is checking whether files exist and asking for permission before deleting them. In my perfect world, though, I would also display the path of the file in question. Let's get the code going. Copy and run this:</p>
+
+<pre>
+<code class="language-ruby">
+longPath$ = homeDirectory$ + "/Desktop/very/long/path/that/will/not/fit/in/the/window/because/its/name/is/so/amazingly/incredibly/long"
+
+beginPause: "File exists"
+	comment: "The following file already exists:"
+	comment: longPath$
+	comment: "Do you want to overwrite it?"
+clicked = endPause: "Ok", 1
+</code>
+</pre>
+
+<p>I don't like how long file paths won't fit in the pause window, so I'm going to figure out some code to add a newline after every 50 characters. Here's my solution:</p>
+
+<pre>
+<code class="language-ruby">
+filePath$ = homeDirectory$ + "/Desktop/very/long/path/that/will/not/fit/in/the/window/because/its/name/is/so/amazingly/incredibly/long"
+
+if fileReadable:
+
+	# I'm going to chop up the long path into
+	# chunks of 50 characters, and save the
+	# chunks in an array
+	maxLength = 50
+
+	pathLength = length: filePath$
+
+	# Use "integer division", where it returns
+	# a whole number, rounded down
+	numChunks = pathLength div maxLength
+	# Get the remainder
+	remainder = pathLength mod maxLength
+
+	# go through the string, extracting a 
+	# chunk as big as max length
+	startPoint = 1
+	for i to numChunks
+		chunk$ = mid$: filePath$, startPoint, maxLength
+		# add chunk to an array called chunks$
+		chunks$[i] = chunk$
+		# move the startPoint
+		startPoint += maxLength
+	endfor
+
+	# if the length of the string does not divide
+	# evenly in our maxLength, get the left over
+	# characters
+	if remainder
+		numChunks += 1
+		chunk$ = mid$: filePath$, startPoint, remainder
+		chunks$[numChunks] = chunk$
+	endif
+
+	beginPause: "File exists"
+		comment: "The following file already exists."
+		comment: "Do you want to overwrite it?"
+		for c from 1 to numChunks
+			comment: chunks$[c]
+		endfor
+	clicked = endPause: "Ok", 1 
+
+	deleteFile: filePath$
+endif
+</code>
+</pre>
+
+<p>That honestly took about a half hour for me to figure out, and I'm not going to want to copy and modify it (changing the variable name of the file path) every time I want to overwrite a file. This will make my script huge, difficult to read, and more difficult to debug. This is a perfect candidate for a procedure.</p>
+
+<p>All we have to do is surround the code in "procedure...endproc", give it a name, add dots before the variables, and since the file path is what's going to change every time we call the procedure, we'll have that be an argument. I'm also going to write some comments explaining briefly what the procedure does:</p>
+
+<pre>
+<code class="language-ruby">
+longPath$ = homeDirectory$ + "/Desktop/very/long/path/that/will/not/fit/in/the/window/because/its/name/is/so/amazingly/incredibly/long"
+
+@checkFile: longPath$
+
+# Will check if file exists, ask for permission
+# if it does, and delete the file
+procedure checkFile: .filePath$
+
+	if fileReadable: .filePath$
+
+		# I'm going to chop up the long path into
+		# chunks of 50 characters, and save the
+		# chunks in an array
+		.maxLength = 50
+
+		.pathLength = length: .filePath$
+
+		# Use "integer division", where it returns
+		# a whole number, rounded down
+		.numChunks = .pathLength div .maxLength
+		# Get the remainder
+		.remainder = .pathLength mod .maxLength
+
+		# go through the string, extracting a 
+		# chunk as big as max length
+		.startPoint = 1
+		for .i to .numChunks
+			.chunk$ = mid$: .filePath$, .startPoint, .maxLength
+			# add chunk to an array called chunks$
+			.chunks$[.i] = .chunk$
+			# move the startPoint
+			.startPoint += .maxLength
+		endfor
+
+		# if the length of the string does not divide
+		# evenly in our maxLength, get the left over
+		# characters
+		if .remainder
+			.numChunks += 1
+			.chunk$ = mid$: .filePath$, .startPoint, .remainder
+			.chunks$[.numChunks] = .chunk$
+		endif
+
+		beginPause: "File exists"
+			comment: "The following file already exists."
+			comment: "Do you want to overwrite it?"
+			for .d from 1 to .numChunks
+				comment: .chunks$[.d]
+			endfor
+		.clicked = endPause: "Ok", 1 
+	endif
+endproc
+</code>
+</pre>
+
+<p>Now you can simply copy-paste this code to the bottom of your file, and call it whenever you want! I would personally save this procedure to its own separate file in my script library so it will be easy to find. But don't stop reading yet, we have to talk about how to get values out of our procedures.</p>
+
+<h2>Why the dots? Scope, procedures vs. functions</h2>
+
+<p>To talk about why we want the dots in front of the variable names, we need to talk a little about scope and functions. I'll tell you right off the bat that at this point Praat doesn't allow us to make our own functions (but we can do the same thing with procedures).</p>
+
+<p>To understand functions, let's compare the concept to something from real life. I'm not a particularly good cook, but I really enjoy good food. How do I resolve this quandary? I go to a restaurant, place an order, give them money, and get food. Functions are a lot like this. When we call a Praat function like "Get number of intervals", we give it the argument of a tier number, and it returns a number to us. Here's how we do that (which is what we've been doing all along):</p>
+
+<pre>
+<code class="language-ruby">
+# The function is "Get number of intervals"
+# We give it one numeric argument, "tierNumber"
+# It returns a number to us, which we saved in "numInts"
+numInts = Get number of intervals: tierNumber
+</code>
+</pre>
+
+<p>We could turn our restaurant example into a function. I go the restaurant (select the right function), give them money and my order (arguments), and it will <em>return</em> my food to me. Here's some pseudo-code to do this:</p>
+
+<pre>
+<code class="language-ruby">
+# NOT REAL CODE! FOR ILLUSTRATION ONLY
+function orderFood: order$, dollars
+
+	# Make sure customer gave us money
+	if not dollars &gt; 0
+		errorMessage$ = "We need money to make your food."
+		return errorMessage$
+	endif
+
+	# Do whatever we need to do to make the order
+	# .........
+	#
+
+	completeOrder$ = "Here is your " + order$
+
+	return completeOrder$
+
+endfunction
+</code>
+</pre>
+
+<p>One of the key differences between Praat's procedures and functions in most languages is that in Praat, every variable has "global scope", meaning every variable accessible from anywhere in the script. In many other languages variables inside a function only exist inside that function, and a function knows nothing about any variables not created inside of it. Let me show you what that looks like in a language like python:</p>
+
+<pre>
+<code class="language-python">
+#THIS IS NOT PRAAT'S LANGUAGE,
+#IT'S AN EXAMPLE OF PYTHON CODE
+
+# here's a variable created outside the function
+favoriteNumber = 88
+
+# here's a function called "test function "
+# it receives one argument (var1)
+def testFunction(var1):
+
+	# var1 and innerVar are variables 
+	# created inside the function, 
+	# They are born, live, and die here
+
+	innerVar = var1 + 2
+
+	# THIS WILL CAUSE AN ERROR:
+	# the function does not know that
+	# favoriteNumber exists
+	newVar = favoriteNumber + 2
+
+# we're outside of the function scope again
+
+# THIS WILL CAUSE AN ERROR, because
+# innerVariable was created inside the
+# function, so we can't access it
+otherNumber = innerVar + favoriteNumber
+
+# if we create a variable with the same name as
+# a variable inside a function, it's not a problem,
+# since they don't know about each other
+innerVar = """I'm a completely separate variable
+	from the one in the function"""
+</code>
+</pre>
+
+<p>I remember when I first started programming I thought that this restriction of variable scope was a nuisance, but I soon came to realize it's a very good thing. Let's go back to our chef example. The chef (the function) only needs your money and an order, and you leave the cooking up to him: we don't care which tongs he uses, I'm not butchering the steak for him, I frankly don't care what goes on in there as long as I get what I ordered and it's made correctly. And more importantly, we only gave the chef permission to make us food. We don't want him to take our credit card number and buy us a puppy, he should stay in his kitchen and do his job. We want steak, he wants money, and we have a nice division of labor.</p>
+
+<p>Coming back to programming, since variables in Praat are all global, if there's a variable in the procedure that has the same name as one of our other variables, we have just introduced a bug, since the procedure has come out of the kitchen and tinkered with our stuff. Here's an example of that problem:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+# Here's a variable saving my name
+name$ = "Dan"
+
+# order a pizza
+@makePizza: 10
+
+# Say my name!
+appendInfoLine: "My name is not " + name$ + "!"
+
+# Here's a procedure where a chef named
+# Willie makes me a pizza.
+# Note the lack of dots in the procedure
+procedure makePizza: money
+	# The chef's name
+	name$ = "Willie"
+	appendInfoLine: name$ + " made your pizza"
+endproc
+</code>
+</pre>
+
+<p>Since the procedure declared a variable with the same name, my name was changed to Willie, and I am not happy about it. Make me pizza, don't change my name! We wouldn't want to copy in a procedure a friend sent us and have it mysteriously cause our script to misbehave. We might not even notice the error depending on what went wrong!</p>
+
+<p>This is what the dots are for: they keep the variables local to the procedure. Let's modify the above example so Willie minds his own business:</p>
+
+<pre>
+<code class="language-ruby">
+procedure makePizza: .money
+	# The chef's name
+	.name$ = "Willie"
+	appendInfoLine: .name$ + " made your pizza"
+endproc
+</code>
+</pre>
+
+<h2>"Return" values: Getting values out of a procedure</h2>
+
+<p>The difference between functions and procedures that we just talked about is how in many languages, variables inside a function do not have global scope, but in Praat's procedures they do. The second difference is that functions "return" a value, but Praat's procedures do not. That's not a problem, though, because even with the dots, we can still read the values of variables in a procedure (you actually can't do this in functions). I'll show you what I mean.</p>
+
+<p>Firstly, we should know that the dots in the makePizza procedure are actually a shorthand for "makePizza.":</p>
+
+<pre>
+<code class="language-ruby">
+procedure makePizza: makePizza.money
+	# The chef's name
+	makePizza.name$ = "Willie"
+	appendInfoLine: makePizza.name$ + " made your pizza"
+endproc
+</code>
+</pre>
+
+<p>Knowing this, we can actually read the values of variables inside procedures. Check this out:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+# Here's a variable saving my name
+name$ = "Dan"
+
+# order a pizza
+@makePizza: 10
+chefName$ = makePizza.name$
+
+# Say my name!
+appendInfoLine: "My name: " + name$
+appendInfoLine: "Chef's name: " + chefName$
+
+# Here's a procedure where a chef named
+# Willie makes me a pizza.
+procedure makePizza: .money
+	# The chef's name
+	.name$ = "Willie"
+	appendInfoLine: .name$ + " made your pizza"
+endproc
+</code>
+</pre>
+
+<p>So we can nearly completely emulate the way functions work using procedures. If we use the dots we can keep procedures from changes our variables, and we can imitate return value behavior by reading a procedure variable with its full name. Since I'm so accustomed to the function way, a personal rule of mine is that if I want a procedure to return something, I save it in a variable name ".return" or ".return$". Whatever you decide, you should add a little note in comments above your procedure telling the user what your intention is.</p>
+
+<h2>One last example with a return value: Zero-padded numbers</h2>
+
+<p>Here I'm just quickly going to share a procedure with you that adds leading zeros to numbers. One nuisance I've come across is that not all programs use "natural sorting". What I mean is this: If you, as a human see two files named 9.mp3 and 10.mp3, you will know that 9.mp3 should come before 10.mp3. Programs that don't implement natural sorting are too stupid to realize this. Since the first character of 10.mp3 is 1, and the first character of 9.mp3 is 9, it puts 10.mp3 first. If you had a list from 1 to 20, this is what you get:</p>
+
+<pre>
+<code class="language-markup">
+1
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+2
+20
+3
+4
+5
+6
+7
+8
+9
+</code>
+</pre>
+
+<p>Not cool. One way I defend against this is to zero-pad my numbers: I'll put leading zeros in front of the numbers so they all have the same amount of characters, and you shouldn't have any sorting problems if you're reading these files with another program:</p>
+
+<pre>
+<code class="language-markup">
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</code>
+</pre>
+
+<p>I made a procedure where you can give it a number, and it will give you back a zero-padded string, so when I save file names things will sort nicely. Here it is. You can uncomment the code outside of the procedure to test it:</p>
+
+<pre>
+<code class="language-ruby">
+# Arguments are a whole number, and the
+# desired length of the return string
+# For example: @zeroFill: 6, 3 will return
+# "006".
+#
+# The result is saved in zeroFill.return$
+procedure zeroFill: .num, .numZeros
+
+	.highestVal = 10 ^ .numZeros
+
+	.num$ = string$: .num
+	.numLen = length: .num$
+	
+	.numToAdd = .numZeros - .numLen
+
+	.zeroPrefix$ = ""
+	if .numToAdd &gt; 0
+		for .i from 1 to .numToAdd
+			.zeroPrefix$ = .zeroPrefix$ + "0"
+		endfor
+	endif
+
+	.return$ = .zeroPrefix$ + .num$
+
+endproc
+
+#### unit tests
+#@zeroFill: 1450, 8
+#
+#appendInfoLine: zeroFill.return$
+</code>
+</pre>
+
+<h2>Conclusion</h2>
+
+<p>Praat procedures, when designed to work independently, are a really great tool to help you avoid repeating code. It's always worth a second to stop and think if you should turn a chunk of code into a procedure. Ask yourself, am I repeating similar code in several places in this script? PROCEDURE! Did I just come up with a useful chunk of code that I could stash and use later in future scripts? PROCEDURE! The final tip is that you should aim to have your procedures do only ONE thing, to keep them very flexible. You should split procedures that do multiple things into multiple procedures. Hopefully you will find procedures as useful as I have!</p>
+
+<h2>Final note: Keeping procedures in separate files</h2>
+
+<p>You can of course copy and paste the procedure into any project you want to use it in, but this does kind of violate the spirit of encapsulation, since if you ever improve it, you have to go around and find it in your other scripts as well. Instead of copy-pasting, you could choose to do this:</p>
+
+<pre>
+<code class="language-ruby">
+include /home/daniel/Documents/praatScripting/zeroFill.praat
+</code>
+</pre>
+
+<p>But unfortunately, the way Praat does this is not the best: You can't use homeDirectory$ or any other variable with "include", and you can't use relative paths! Therefore, if you ever move your script or you want to share it with someone else, your script just broke. Major bummmer, and definitely a drawback of the language. Therefore, with Praat I simply recommend copy-pasting your procedures to the bottom of the file.</p>
+
+<p>Lastly, if you do use "include", put it at the bottom of the file (which is backwards from most languages). The problem is Praat actually mashes the two files together before running it, and all of your line numbers in your error messages will be messed up if the include statement is at the top of the file. Let's say I have a procedure in a separate file, and that file is 30 lines long:</p>
+
+<pre>
+<code class="language-ruby">
+include /home/daniel/scripts/someProcedure.praat
+
+# purposefully creating an error here
+name = "Jenny"
+</code>
+</pre>
+
+<p>If your ran this code, it would tell you that there's an error on line 34 since it inserted your 30 line procedure at the top of the file, but from what you can see, it's on line 4! Lame. So again, I think copy-pasting is the hassle-free way to go with Praat procedures.</p>
+
+{% include "templates/_footer.njk" %}

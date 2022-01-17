@@ -1,0 +1,85 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Setting up a development environment</h1>
+
+<p>For those that have any programming experience, the title is kind of a joke, especially if you've lost a day installing Microsoft development tools. There is not much you need to install. I'm sorry we haven't jumped right into teaching how to make your Praat scripting magic happen yet, but from my personal experience, you will come to appreciate what this page gives you later.</p>
+
+<p>Download <a href="TODO">this zip zile</a>, scan for viruses just in case, extract it, and move the folder that was inside of it to your Documents folder if you please, so we will have a common folder we can reference throughout the tutorial. When you're finished, you should have a folder called "praatTutorial" in your Documents folder.</p>
+
+<p>Back in the Praat main window, open the script "extractWords.praat" by going to File &gt; Open Praat script and navigating to the file. This opens a window we saw before, a "Script Editor" window. Don't worry about reading this script for now. Run the script.</p>
+
+<p>Oops! That generated an error.  This error gives us some cryptic error about strings or something, which if you're like me when I started means nothing to you. Well, one clue is that there's a problem with line 109. Go to line 109 and change it to ...</p>
+
+<p>What's that, you say? You don't feel like counting to one hundred and nine? Well, me neither. You could go to the "Search &gt; Go to line..." command, but I have another suggestion.</p>
+
+<p><strong><em>Download a nice text editor!!!!</em></strong> You owe it to yourself. The default apps on Mac and Windows for opening text files are GARBAGE. I recommend Sublime Text for three reasons: it automatically shows you line numbers, it's *essentially free (it has an unlimited trial period), it's cross-platform, and (the real reason) someone made a plugin that lets you view Praat scripts in pretty colors like this (actually better than this, I couldn't find one for the web, this site uses highlighting for the language "Ruby"):</p>
+
+<pre>
+<code class="language-ruby">
+if interactive == 1
+	#appendInfoLine: "Interactive"
+
+	inFile$ = chooseReadFile$: "Choose a Praat .Collection file"
+	@getParentDir: inFile$	
+	wd$ = getParentDir.result$ 
+	outDir$ = wd$
+
+	beginPause: "Which tier?"
+		comment: "Enter the number of the tier the word labels are on"
+		positive: "Tier_number", 1
+		comment: "How do you want to save the file(s)?"
+		choice: "Pick one", 1
+			option: "Together in a .Collection file"
+			option: "Separate wav and TextGrid files"
+			option: "Only the wav file"
+	clicked = endPause: "Continue", 1
+
+	wordTier = tier_number
+
+	saveTG = pick_one
+	if saveTG == 1
+		saveTG$ = "Collection"
+	elif saveTG == 2
+		saveTG$ = "sep"
+	elif saveTG == 3
+		saveTG$ = ""
+	endif
+
+endif
+</code>
+</pre>
+
+<p>This is called "syntax highlighting", and beyond being pretty, it helps you visualize your code quickly and spot errors more easily. You know what they say, "Once you have more colors than just black, you never go back". They say that. For real. For example, look what happens at the last line, where I forgot a closing quote:
+
+<pre>
+<code class="language-ruby">
+# Famous Canadians named Justin
+
+theBiebs = "Justin Bieber"
+theNoz = "Justin Nozuka"
+trudy = "Justin Trudeau
+</code>
+</pre>
+
+<p>It's friggin great. I can see right away that something went wrong. Thank you Mauricio Figueroa for writing the sublime version, available <a href="https://github.com/mauriciofigueroa/praatSublimeSyntax" target="_blank">here</a>, which includes installation instructions (tip: to get the files, click on the "Download ZIP" button). And thanks to the others who have written plugins for <a href="http://sadowsky.cl/praat.html#syntax" target="_blank">Notepad++</a> (Windows), and <a href="https://github.com/jjatria/praatKateSyntax" target="_blank">Kate</a> (Linux). Also, it's available for <a href="https://github.com/jjatria/praatKateSyntax" target="_blank">Vim</a>. Although if you use Vim, I'm not sure why you're reading this tutorial...
+
+<p>After getting a nice text editor and installing syntax highlighting, it will work if you give your files a .praat extension.</p>
+ 
+<p>Since we want line numbers and pretty colors, we're not going to use Praat's Script Editor as our main editing terminal for longer scripts. I personally use the Praat script editor like a type of scratchpad. If I'm working on a longer script, and I come across a problem I haven't tried to solve before, I don't want to try to solve it amidst all the complexity of my longer script. I'll open a Praat Scripting Window and make a miniature version of this problem I'd like to solve. Then I'll copy it into my fancy text editor when it works..</p>
+
+<p>Open the file in your shiny new text editor, and change line 109 to the following. Look hard to spot the small difference:</p>
+
+<pre>
+<code class="language-ruby">
+	seldObj$ = selected$()
+</code>
+</pre>
+
+
+<p>Back in the Praat scripting window, we don't want to type the same changes twice. Not only is this annoying, it's very prone to error. So in the File menu, select "Reopen from disk" to refresh the file. Run the script again. It should run successfully.</p>
+
+<p>When I'm working on non-trivial scripts in Praat my workflow is similar to what we just did: I open the script in both my fancy text editor and in Praat, but edit the file ONLY in the fancy text editor, and refresh and run it in Praat. It is very important to have a consistent workflow and not have to worry about where and when edits were made. You will quickly go insane and hate life.</p>
+
+{% include "templates/_footer.njk" %}

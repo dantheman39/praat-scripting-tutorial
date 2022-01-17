@@ -1,0 +1,189 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Dealing with file names programmatically</h1>
+
+<p>I personally found paths to be a big pain in the kiester when I first started programming and programming for Praat. Maybe you've had the experience of trying to get a script to open or write a file, and been driven mad with a "File not found" error. I'm under the impression that with more recent upgrades of Praat some of this has been made easier. This chapter's goal is bring you up to speed on how files are named programmatically, allowing you easily open and save files from your scripts, and understand any errors when you've made a mistake.</p>
+
+<p>So, what is a <strong>path?</strong> A path is essentially a location on your file system, aka the name of a file or folder. Let's pretend we have a folder on our Desktop called "myVideos", that contains a movie file called "Graduation.mp4". We're used to interacting with that file through something like Mac's Finder or Windows' File Explorer, where we click our way to the file, navigating through folders as if they were "places". This is definitely a user-friendly way of doing things in a point and click environment. </p>
+
+<p>These nice user interfaces somewhat obscure the fact that this file's full name (full path) is something like this (I'm saving the path name to a string variable, vidFile$):</p>
+
+<pre>
+<code class="language-ruby">
+#Linux: 
+vidFile$ = "/home/daniel/Desktop/myVideos/Graduation.mp4"
+
+#Mac: 
+vidFile$ = "/Users/daniel/Desktop/myVideos/Graduation.mp4"
+
+#Windows:
+vidFile$ = "C:\Users\daniel\Desktop\myVideos\Graduation.mp4"
+</code>
+</pre>
+
+In Praat scripts, when you are going to read (open) or write (save) a file, you use paths and write them in the format above, you are not going to emulate point and click behavior.</p>
+
+<p>Look at the sample path again. Each slash (forward slash in Mac and Linux, backslash in Windows) represents a "directory". "Directory" is the older name for "folder" that is commonly used by programmers. The house icon on your point and click file browser represents your "home directory", and is a graphic representation of something like /Users/&lt;yourusername&gt;, or C:\Users\&lt;yourusername&gt;. This is where all files that belong to you (your computer user) live. Note that files that are above this folder (like those is C:\ or / ("root")) typically belong to the system, and you are not supposed to mess with those files unless you know what you're doing.</p>
+
+<p>You can pretty easily get the path of a folder or file by looking at its Info/Properties. In Mac's finder, select the item, and from one of the dropdown menu above select "Get info", or hit ⌘ + i. In Windows, you can right click it, and select "Properties". There should be a field showing you the path of the item.</p>
+
+<h2>Make your paths more "future-proof": Relative paths</h2>
+
+<p>Up until now, we've been talking about "absolute paths". That is, we've given a file's full name. This has a big downside, though: My computer username is not the same as yours, and if I own two computers, the username might not be the same on both machines. If I'm ever planning on sharing my script, I have just guaranteed an error: If I try to open or write any files it won't work because they wouldn't exist. If I wrote the script on a Mac, and give it to a Windows user, the problem is even worse: they would have to change the beginning to "C:" and reverse all of the slashes. One very good and very simple solution to this is to use "relative paths". Let's look at one:</p>
+
+<pre>
+<code class="language-ruby">
+#Mac,Linux: 
+vidFile$ = "myVideos/Graduation.mp4"
+
+#Windows:
+vidFile$ = "myVideos\Graduation.mp4"
+</code>
+</pre>
+
+<p>You can tell that it's a relative path because it doesn't start with a slash or C: (C:, D:, etc. are drive names in Windows). If you give a program a "relative path", it will figure out the full name by itself, using the location of the script as a reference point (your "working directory"). So if I have a Praat script "bitchinScript.praat" on my Desktop, and in this script I reference a file with a relative path like "input/whaleSounds.wav", Praat will expand it to this on my machine:</p>
+
+<pre>
+<code class="language-ruby">
+"/home/daniel/Desktop/input/whaleSounds.wav"
+</code>
+</pre>
+
+<p>Let's say Queen Elizabeth was keen on checking out those whale sounds, and she downloaded "bitchinScript.praat" into her Downloads folder on her Windows machine. The relative path will be expanded to:</p>
+
+<pre>
+<code class="language-ruby">
+"C:\Users\mymajesty\Downloads\input\whaleSounds.wav"
+</code>
+</pre>
+
+<p>Another very helpful trick is that two dots and a slash "../" means "Go a level up". So if the script is in Her Majesty's Downloads folder and we save a file at this path:</p>
+
+<pre>
+<code class="language-ruby">
+outFile$ = "../analysis.txt"
+</code>
+</pre>
+
+<p>It will end up in her home folder, one folder higher on the file system. You can also combine them to go up multiple levels "../../analysis.txt". This is a good thing to know, but honestly you shouldn't use it in your Praat scripts, because going levels above a home folder could either generate permission errors or do some damage. It is generally expected behavior for a script to only deal with files in its own folder and "below".</p> 
+
+<p>Lastly, note that a single dot and slash "./" refers to the current directory. You usually won't have to use that in your scripts, but it's good to know for other applications.</p>
+
+<p>Hopefully the advantage of relative paths has made itself clear. Someone can download a script or a folder containing a script, and if you did your job right, all paths will work. It doesn't matter if the script is in their Downloads folder, in their Desktop, or some other random place, there shouldn't be any errors unless you're trying to write to a folder you don't have permissions for, like those above your home folder. But a normal user would have to try hard to make this error.</p>
+
+<h2>Slashes, note to Windows users</h2>
+
+<p>Some of you might rightfully be wondering about the problem of slashes being reversed between Windows and Unix-based systems. In more recent versions of Praat, this has been resolved quite nicely: If you use the Unix style --forward slashes for folders--, Praat will convert it on Windows. So please, windows users, play nice and only use forward slashes to delineate directories in Praat. It will work on everyone's machine.</p>
+
+<h2>Creating better full paths</h2>
+
+<p>Let's say we just want to write something to the user's Desktop, a common place that every computer user is comfortable with. We again run into the problem of not knowing their username, and not knowing what their operating system is. Praat solves this for us by giving us the global variable homeDirectory$. We can build paths using homeDirectory$, and Praat will automatically convert this to "C:\Users\frankenstein" or "/home/daniel". Therefore, we can specify a full path with something like this:</p>
+
+<pre>
+<code class="language-ruby">
+outFile$ = homeDirectory$ + "/Desktop/outFile.csv"
+</code>
+</pre>
+
+<p>As long as the user has a Desktop folder, this will be a good path and the script will not throw an error. Other useful global variables are temporaryDirectory$, preferencesDirectory$, and check out more at the Praat Scripting Tutorial, Chapter 5.1: Variables, available in your Help menu or online. Note that these variables have special meaning for Praat, so don't try to change them. Use them, don't assign to them:</p>
+
+<pre>
+<code class="language-ruby">
+#Perfectly fine:
+workingDirectory$ = homeDirectory$ + "/Desktop/"
+
+#Asking for trouble, DON'T DO THIS:
+homeDirectory$ = homeDirectory$ + "/Desktop/"
+</code>
+</pre>
+
+
+<h2>Summary</h2>
+
+<p>A path is a location on a filesystem. If you always use relative paths or create absolute paths with homeDirectory$, and you always use forward slashes, a well-written script is much more portable and can work on anyone's machine.</p>
+
+<h2>Tip: Building paths piecemeal</h2>
+
+<p>This last point is just a tip, it's a sort of best practice I've come to follow myself based on what I've seen other programmers do. I think it's ultimately more efficient to build up paths piecemeal if you're going to have several files referenced in your script.</p>
+
+<p>Let's pretend we have a folder that contains our script, another folder "input" containing .wav files and .TextGrids, and a folder "output", where we'll write some spreadsheets. This is the less maintainable way:</p>
+
+<pre>
+<code class="language-ruby">
+inputFile1$ = "input/peach.wav"
+outputFile1$ = "output/peach.csv"
+</code>
+</pre>
+
+<p>Again, this is a very short script so it's trivial here, but in longer scripts it's ultimately more efficient to define the input and output folders at the top of the script, and the build the file names using the "+" concatenate operator:</p>
+
+<pre>
+<code class="language-ruby">
+inDir$ = "input/"
+outDir$ = "outDir/"
+
+######later on in the script...
+
+inFile1$ = inDir$ + "peach.wav"
+outFile1$ = outDir$ + "peach.csv"
+</code>
+</pre>
+
+<p>If I later rename the input and output folders, I only have to change this once in the script.</p>
+
+<p>Personally, and again this is just me, I like to keep all of my scripts in one place so that I can find them more easily. The problem with this is that I always have to use absolute paths, since I don't want to mix data from a project with my script library. So again, I build the full path piecemeal.</p>
+
+<pre>
+<code class="language-ruby">
+#wd$ is my working directory
+wd$ = homeDirectory$ + "/Documents/praatTutorial/"
+
+inDir$ = wd$ + "input/"
+outDir$ = wd$ + "output/"
+
+######later on in the script...
+
+inFile1$ = inDir$ + "peach.wav"
+outFile1$ = outDir$ + "peach.csv"
+</code>
+</pre>
+
+<p>Now if I want to reuse the script with a different set of data, I only change one line of code (the line with the working directory) and everything else works.</p>
+
+<h3>Watch out for trailing slashes</h3>
+
+<p>When we build files by combining variables, pay attention to whether or not there's a slash on the end of the folder name. See if you can spot the subtle mistake here:</p>
+
+<pre>
+<code class="language-ruby">
+# Trouble
+
+inDir$ = homeDirectory$ + "Desktop/input"
+
+outFile1$ = inDir$ + "out.txt"
+</code>
+</pre>
+
+<p>Print the value of "outFile1$". Since it's missing a slash, you're going to create a file named "inputout.txt" in your Desktop, not a file named "out.txt" in a folder called "input"! My personal custom (based on what I've seen others do) is to always end folders with a slash.</p>
+
+<h2>Final important note about paths: Special characters</h2>
+
+<p>One thing I can't go without mentioning, is that Praat has simplified paths for us. In traditional paths, you may have to consider "special" characters, like (ahem) spaces! Paths come from way back, where spaces separated commands and their arguments. So when you have a "special" character, you have to "escape" it with the opposite slash. So if we have a folder that has parentheses and spaces in the name (like "Acabou chorare (1972)", on *nix the path will be Acabou\ chorare\ \(1972\). On Windows it would be Acabou/ chorare/ /(1972/). The opposite slash alerts the program that the character that follows should be treated as a normal character, and not interpreted with its special significance (like "separator of arguments" for spaces).</p>
+
+<p>Last I checked, Praat was behaving very well if I just surrounded the path in double quotes, meaning that we could just enter "Acabou chorare (1972)" and it should work. But since you're going down the road of getting into programming and digging deeper into your computer, do yourself a big favor: Get in the habit of thinking carefully about how you name your folders and files. Don't include "weird" characters, like parentheses, colons, semicolons, or spaces. It's common to use camel case: "acabouChorare1972" or use underscores: "acabou_chorare_1972", and combine one of these with dashes: "acabouChorare-1971". Dashes are really nice for giving your files logical names. We'll see in a later chapter that we can leverage this to read files in an intelligent way, like "01-bank-46.wav", representing Group 1, "bank", subject 46.</p>
+
+<h2>Common errors:</h2>
+
+<h4>I know this file exists but it still says not found!</h4>
+<ul>
+	<li>As always, just check your typing, really closely.</li>
+	<li>Print the variable before using it, make sure it looks right.</li>
+	<li>Are you trying to save a file with an illegal character in the file name, like ":" or an IPA symbol?</li>
+	<li>Always check your slashes. Are they going in the right direction? Did you leave one out when you built a path? Or add an extra one?</li>
+	<li>Are you trying to write (save a file) to a directory that you don't have permissions in? Like in root ("/", "C:\") or the Applications folder? Make sure you're writing to somewhere within your home folder.</li>
+	<li>Are you trying to save a file to a folder that doesn't exist yet? Praat will not automatically create directories for you. In the following path, the folder "praatTutorial" must already exist, Praat will not create it for us. "/Users/daniel/Documents/praatTutorial/outFile.csv". If it doesn't exist, you'll get an error. Praat does allow you to make folders, though, using the "createDirectory" command.</li>
+</ul>
+
+{% include "templates/_footer.njk" %}

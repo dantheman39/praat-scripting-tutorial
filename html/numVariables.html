@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Numeric variables</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Numeric variables</h1>
+
+<p>A lot of tutorials at this point would jump right in and start showing you shortcuts to start Praat programming, but please resist the urge. We will do that soon, but I think that will be much easier to explain and understand in a more profound way if we talk first about variables and data types in Praat</p>
+
+<p>A fundamental part of programming is manipulating variables. Variables are essentially containers that hold information. Let's jump right into using them:</p>
+
+<pre>
+<code class="language-ruby">
+age = 34
+</code>
+</pre>
+
+
+<p>In programmer parlance, we've <i>assigned</i> the number 34 to a variable called "age". which means we've made a container named "age" and have filled it with the number thirty-four. There are a few key details to note here.</p>
+
+<ul>
+	<li>"age" is a name I made up. It might as well have been asdfg (although that's a stupid idea). When I first started learning to program, I found it hard to know what parts in a script were made up by the programmer, and what parts were built-in Praat commands. Well... no easy answer to that now, hang in there.</li>
+
+	<li>Secondly, note that the variable (age) is on the left hand side and the value (34) is on the right. In Praat's language this is a requirement.</li> 
+
+	<li>We use the "=" sign, although there's a subtle difference between the way we normally think of it and the way it's used here. It doesn't really mean "equals", it's actually called the <i>assignment operator</i>. Its job is to take values and assign them to variables.</li>
+
+	<li>Another thing is that there is a single space on either side of the assignment operator. This isn't really required, but is considered good style and supposedly improves readability of your code.</li>
+
+</ul>
+
+<h3>Well-formed variable names</h3>
+
+<p>Let's look at another variable:</p>
+
+<pre>
+<code class="language-ruby">
+numKids = 2
+</code>
+</pre>
+
+
+<p>Hopefully it's easy to guess that this variable represents "number of kids". I've chosen a name that is short and meaningful. Short so I won't get mad about typing it a bunch of times and am less likely to type it wrong; and meaningful so I won't have trouble remembering what it means when I come back to it a few weeks later.</p>
+
+<p>But why didn't I just write "Number of kids = 2"? Besides being long, this would cause an error and Praat would not finish the script, because it has restrictions on what a variable name can look like. Open a new scripting window, type "Number of kids = 2" (without the quotes), and run it. Check out the error message, and be happy that you understand it.</p>
+
+<p>Here are the rules for variable names in Praat (hopefully I haven't left anything out):</p>
+
+<p><strong>A variable can be composed of a combination of letters and numbers, but Praat requires that it start with a lowercase letter. It cannot contain spaces or other "weird" characters like accents or pound signs or the like. Variables are case sensitive (rollsRoyce is not the same variable as rollsroyce).</strong></p>
+
+<p>Those of us used to a Roman script have a hard time reading words without spaces (not a problem for you, Thailand!!! Whaddup China!!!). In order to make variable names more readable there are two common practices used to make up for the lack of spaces. You can either use underscores instead of spaces, or use what's known as camel case, where every subsequent word begins with a capital letter:</p>
+
+<pre>
+<code class="language-ruby">
+beers_drunk = 4
+beersDrunk = 4
+</code>
+</pre>
+
+<p>I personally prefer camel case because I find it easier to type, but it really doesn't matter. Just pick one. You should always stick to one naming convention throughout a script to simplify your life.
+
+<h3>Quick practice!</h3>
+
+<p>Which of these are legal variable names in Praat, and why?</p>
+
+<pre>
+<code>
+1. Gang
+2. street
+3. beers
+4. imperial IPA
+5. fish_and_chips
+6. fishAndFries
+7. 2ndSt
+8. name$
+</code>
+</pre>
+
+
+<p>1. Incorrect 2. Correct 3. Correct 4. Incorrect 5. Correct 6. Correct 7. Incorrect 8. Correct.</p> 
+
+<p>The last one was a trick. The dollar sign at the end of a variable name is legal, but it has a special meaning in Praat. We'll talk more about this in the next section.</p>
+
+<h3>What's the point?</h3>
+
+Who cares? Why are we talking about variables? Well, VARIABLES ARE INCREDIBLY USEFUL AND ARE BASICALLY THE WHOLE POINT OF PROGRAMMING. You abstract away from a specific number and just have an entity that represents a number, which can be changed and reused in a series of commands, no matter what it's value is: We can treat this variable just like a number, make calculations with it, change its value, rinse and repeat.
+
+<h3>Some more examples</h3>
+
+Here we assign two variables, add them up, and print the result to the Info Window.
+
+<pre>
+<code class="language-ruby">
+lunchBeers = 3
+dinnerBeers = 8
+totalBeers = lunchBeers + dinnerBeers
+appendInfoLine: totalBeers
+</code>
+</pre>
+
+<p>You could have written appendInfoLine: 3 + 8, but that would be short-sighted. Variables are where the true power and flexibility of programming come to play. Entering the number 3 or 8 directly in an equation instead of using variables like in the example is called "hard-coding", and you should generally avoid this. It may seem trivial now, but when you get a longer script that you want to modify, you just change a value once at the moment you assign it (i.e.change lunchBeers = 3 to lunchBeers = 7), and it works for all subsequent times in the script that you use its name, instead of changing a meaningless number a bajillion times in a longer script. This will cause you many headaches. Avoid hard-coding!</p>
+
+<pre>
+<code class="language-ruby">
+# Hard-coding: in longer scripts this will 
+# ruin your life. I already have to change
+# it multiple times if Jim orders another
+# beer:
+
+appendInfoLine: "Dan drank", 3, "beers"
+appendInfoLine: "Jim drank", 8, "beers"
+totalBeers = 3 + 8
+appendInfoLine: totalBeers
+
+# The (usually) better way: using variables
+# that can be changed once. 
+
+danBeers = 3
+jimBeers = 8
+totalBeers = danBeers + jimBeers
+appendInfoLine: totalBeers
+
+</code>
+</pre>
+
+
+<h3>Overwriting variables</h3>
+
+<p>Note what happens in the following script:</p>
+
+<pre>
+<code class="language-ruby">
+danBeers = 3
+
+danBeers = danBeers + 1
+
+appendInfoLine: danBeers
+</code>
+</pre>
+
+<p>What is the value of danBeers now? Print it to the info window with appendInfoLine to find out. Is that what you were expecting?</p>
+
+<p>Whenever we change the value of a simple variable like a number, it resets the variable's value and keeps only the most recent change, so the last time we changed danBeers is the number we get. Hopefully you expected the value you got. Let's look at another:</p>
+
+<pre>
+<code class="language-ruby">
+#Let's order some beers. We're in England in the early 2000's, and they 
+#have an early last call, but the pub will remain open, so as is the custom,
+#we load the table with beers to drink after last call 
+
+#I'm ordering three
+danBeers = 3
+
+#Jim ordered eight
+jimBeers = 8
+
+#Jim went to the bathroom. I'm commandeering
+#his beers
+danBeers = danBeers + jimBeers
+</code>
+</pre>
+
+
+<p>How many beers does Jim have now? As far as our script is concerned, he still has 8. It remained unchanged since it was only <i>used</i> and not <i>reassigned</i>, or changed, using the "=" assignment operator. In the line 'danBeers = danBeers + jimBeers', the variable jimBeers was used in the equation, but I never actually did anything to change its value (I didn't reassign it with the assignment operator '=' like I did with danBeers), so the value of jimBeers will remain the same until the end of the script, and jimBeers still equals 8. Let's complete the crime and remove his beers by resetting the value of jimBeers to 0.</p>
+
+<pre>
+<code class="language-ruby">
+
+#Let's order some beers. We're in England in the 2000's, and they 
+#have last call but the pub will remain open, so as is the custom,
+#we load the table with beers to drink after last call 
+
+clearinfo
+
+#I'm ordering three
+danBeers = 3
+
+#Jim ordered eight
+jimBeers = 8
+
+#Jim went to the bathroom. I'm commandeering
+#his beers
+danBeers = danBeers + jimBeers
+jimBeers = 0
+
+appendInfoLine: "Dan has ", danBeers, " beers."
+appendInfoLine: "Jim has ", jimBeers, " beers."
+
+</code>
+</pre>
+
+<h3>Bonus trick</h3>
+
+<p>There is a shorthand common among programming languages to increment the value of a variable +=, so instead of the line 'danBeers = danBeers + jimBeers', I could write 'danBeers += jimBeers' to not have to type danBeers twice (-=, *=, and /= also work by the way).</p>
+
+<h3>Important Praat-specific note!</h3>
+
+<p>If you're using a value less than one (the number begins with a decimal), Praat requires that there be a leading zero before the decimal point:</p>
+
+<pre>
+<code class="language-ruby">
+
+#Let's say I changed my mind, and just 
+#drank a third of one of jim's beers to
+#mess with him. He's bigger than 
+#me and will not let me keep his beers. 
+
+#he starts off with eight
+jimBeers = 8
+
+# this will generate an error, 
+# because it's a decimal number that
+# doesn't start with 0. Comment it out
+# with a hashtag
+jimBeers -= .3 
+
+# this will not generate an error
+jimBeers -= 0.3
+
+# Notice the -= shortcut above.
+# It's the same as this:
+
+#jimBeers = jimBeers - 0.3
+
+</code>
+</pre>
+
+<h3>Exercises:</h3>
+
+<p>1. Go to Praat's scripting manual and see what other mathematical operators are available. How do you get a square root? How do you do exponents, division, and multiplication?</p>
+
+<p>2. Just mess around. Create some variables, give them values, and do mathematical operations with those variables. Print the results to the Info Window. Don't hard-code any numbers once you start doing the operations! Try to break things down and see where they go wrong.</p>
+
+
+    <p>Next page: <a href="stringsIntro">String variables</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>

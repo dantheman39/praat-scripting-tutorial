@@ -1,0 +1,718 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Long example: Extracting formant values to a spreadsheet</h1>
+
+<p>This next one is very long. Consider this an exam, covering most everything we've learned so far. I would definitely use your fancier text editor with syntax highlighting (see <a href="textEditor">this earlier page</a>), and use the workflow we talked about where you only edit in the nice editor, and "Reopen from file" in Praat's scripting editor. I recommend you try to build the script yourself, and then come back and see how I did it. If you find a better way of doing something, share! The final version I have is in praatTutorial/sampleData/formantBatch.praat . No peeking until you've genuinely tried! (If you STILL haven't downloaded the accompanying files, click on the menu above to go to the download page.)</p>
+
+<p>The plan is to loop through every wav file in a directory, open its TextGrid (we assume it has the same name), get F1 and F2 values for every interval, and write it to a spreadsheet. As a bonus, we'll read in a settings file, so that we can customize the values to read the formants for specific individuals. While we're going to make a quality script, I'm not going to worry at this point about making it really easy to use for non-scripters. We can add that functionality in later if we want.</p>
+
+<p>Take a look at one of the wav and text grid file pairs in praatTutorial/sampleData/formantScript/data. Also take a look at the sample spreadsheet in praatTutorial/sampleData/formantScript/output, which is what we're going to generate.</p>
+
+<p>As always, create a plan with comments, mine is below. Your outline might be different, or more general than mine. Totally normal. Since I've made this script before I have a more specific idea of what I want to do. See if you can fill in this outline with code and do this project yourself. If you break everything down into smaller tasks, you will eventually end up with one big functional program:</p>
+
+<p>I also recommend that before you make a loop, you get some test code going on a single file.</p>
+
+<pre>
+<code class="language-markup">
+###### Set up variables
+	# input directory
+	# out file
+	# default formant settings
+
+###### Write spreadsheet header to new file
+
+###### Read in settings file
+
+###### Get a list of wav files in the input directory
+	# For each wav file, open the text grid file
+		# if we have an entry for this file
+		# in our settings file, reset formant variables.
+		# otherwise, reset them to default
+
+		# Get the number of intervals
+		# if not blank
+			# get label of interval
+			# find midpoint
+			# create formant object
+			# get F1 and F2
+
+		# create data row
+		# append to spreadsheet
+</code>
+</pre>
+
+<p>Let's go through these sections and code, starting with setting up the variables. We'll print them and make sure they're working, and ask for permission to overwrite our out file:</p>
+<pre>
+<code class="language-ruby">
+clearinfo
+###### Set up variables
+askBeforeDelete = 1
+tierNum = 1
+
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleData/formantScript/"
+
+# input directory
+inDir$ = wd$ + "data/"
+# I know I'll want only wav files
+inDirWavs$ = inDir$ + "*.wav"
+
+# make sure inDir$ exists
+if not fileReadable: inDir$
+	exitScript: "The input folder doesn't exist"
+endif
+
+settingsPath$ = wd$ + "formantSettings.tsv"
+# if it doesn't exist, print a 
+# warning. We won't stop the script,
+# because maybe we don't need a settings file
+if fileReadable: settingsPath$
+	# set up a variable so we can quickly make sure
+	# the Table exists later in the script
+	settingsExist = 1
+else
+	appendInfoLine: "WARNING: Settings file not found"
+	settingsExist = 0
+endif
+
+# out file
+outDir$ = wd$ + "output/"
+outPath$ = outDir$ + "formantResults.tsv"
+
+# if the output folder doesn't exist, create it.
+# This won't throw an error if it already exists.
+createDirectory: outDir$
+
+# see if our spreadsheet exists
+if askBeforeDelete and fileReadable: outPath$
+	pauseScript: "The data spreadsheet exists, overwrite it?"
+endif
+deleteFile: outPath$
+
+# default formant settings
+# since I know these might be changed later
+# for specific files, I'm creating defaults
+# here that I will never change, so I can 
+# reset their values
+timeStepDefault = 0
+numFormantsDefault = 5
+maxFormantDefault = 5500
+windowLengthDefault = 0.025
+preEmphasisDefault = 50
+</code>
+</pre>
+
+<p>Let's write the header for our destination spreadsheet.</p>
+
+<pre>
+<code class="language-ruby">
+###### Write spreadsheet header to new file
+
+sep$ = tab$
+
+header$ = "fileName" + sep$
+	...+ "intervalNumber" + sep$
+	...+ "label" + sep$
+	...+ "midPoint" + sep$
+	...+ "f1" + sep$
+	...+ "f2" + sep$
+	...+ "numFormants" + sep$
+	...+ "maxFormant" + newline$
+
+appendFile: outPath$, header$
+</code>
+</pre>
+
+<p>This would be a good time to stop and make sure everything is working. We should end up with a spreadsheet with only one row. If we run the script again, it should ask permission to erase that file, and create it again.</p>
+
+<p>Now we're going to read in our settings table. If an entry exists for a wav file, we'll change the settings for when we get the formant values. Remember again that we're allowing for the possibility that no settings file exists, so before we run any code related to it we first check with our "settingsExist" variable.</p>
+
+<pre>
+<code class="language-ruby">
+###### Read in settings file
+if settingsExist
+	settings = Read Table from tab-separated file: settingsPath$
+endif
+</code>
+</pre>
+
+<p>Now we're going to make sure we can get a list of all of the .wav files in our input directory, and print their names (and their full paths!):</p>
+
+<pre>
+<code class="language-ruby">
+###### Get a list of wav files in the input directory
+wavList = Create Strings as file list: "wavList", inDirWavs$
+
+selectObject: wavList
+numFiles = Get number of strings
+for fileNum from 1 to numFiles
+	wavName$ = Get string: fileNum
+	appendInfoLine: wavName$
+
+	wavPath$ = inDir$ + wavName$
+	appendInfoLine: wavPath$
+endfor
+</code>
+</pre>
+
+<p>Now let's write the code for getting formants. Before complicating our lives and putting it in the loop we just made to get the file names, I'm going hard-code it temporarily to read a specific interval from a specific file. That way, when we inevitably make a mistake, we'll have less to worry about. We're going to work from the "inside out", starting with more specific tasks, and expanding out to add abstraction. Here's what I mean:</p>
+
+<ul>
+	<li>First get formants for one interval I know exists, in a file I know exists.</li>
+	<li>Enclose this in a loop to repeat that process for each interval, in the one file I know exists.</li>
+	<li>Enclose all of this in the file loop, to repeat this process for every file.</li>
+</ul>
+
+<p>Starting with small tasks like this, and later adding the abstraction, will save you A LOT of headaches with more complicated code. Let's put it into practice.</p>
+
+<pre>
+<code class="language-ruby">
+# open wav file I know exists
+# Note I'm overwriting the same variable
+# that we created in the file loop. Then I
+# just delete this line later
+wavPath$ = inDir$ + "consonants.wav"
+
+wav = Read from file: wavPath$
+# get object name
+objName$ = selected$: "Sound"
+
+# Set up formant variables
+timeStep = timeStepDefault
+numFormants = numFormantsDefault
+maxFormant = maxFormantDefault
+windowLength = windowLengthDefault
+preEmphasis = preEmphasisDefault
+
+# create a formant object
+selectObject: wav
+formantObj = To Formant (burg): timeStep, 
+				...numFormants, 
+				...maxFormant, 
+				...windowLength,
+				...preEmphasis
+
+# create text grid path, open TextGrid
+tgPath$ = inDir$ + objName$ + ".TextGrid"
+tg = Read from file: tgPath$
+
+###### Get F1 and F2 from midpoint
+
+# Testing with interval 2
+intNum = 2
+
+selectObject: tg
+
+#Get its label
+label$ = Get label of interval: tierNum, intNum 
+
+# If not blank
+if label$ &lt;&gt; ""
+	# find midpoint
+	beg = Get starting point: tierNum, intNum
+	end = Get end point: tierNum, intNum 
+	midPoint = beg + ((end - beg) / 2)
+
+	selectObject: formantObj
+	# First argument is formant number
+	f1 = Get value at time: 1, midPoint, "Hertz", "Linear"
+	f2 = Get value at time: 2, midPoint, "Hertz", "Linear"
+
+	# Format the values and convert to string, 
+	# to make it easier to write to the spreadsheet
+	f1$ = fixed$: f1, 0
+	f2$ = fixed$: f2, 0
+
+	appendInfoLine: "Vowel: ", label$, newline$,
+		...tab$, "F1 is: ", f1$, newline$,
+		...tab$, "F2 is: ", f2$
+endif
+</code>
+</pre>
+
+<p>That is working, let's change it to write to our file instead of printing the values to the Info Window. Delete or comment out the code of "appendInfoLine", and replace it with code to do so. Watch out for numeric variables!:</p>
+
+<pre>
+<code class="language-ruby">
+		dataRow$ = wavName$ + sep$
+			...+ (string$:intNum) + sep$
+			...+ label$ + sep$
+			...+ (string$:midPoint) + sep$
+			...+ f1$ + sep$
+			...+ f2$ + sep$
+			...+ (string$:numFormants) + sep$
+			...+ (string$:maxFormant) + newline$
+
+		appendFile: outPath$, dataRow$
+</code>
+</pre>
+
+<p>Now we'll make it loop through all intervals in that one file. Think hard about where you want the loop to start, and what variables will have to change. What is common to every interval? What will change with every interval? Don't forget the endfor!</p>
+
+<pre>
+<code class="language-ruby">
+# open wav file I know exists
+wavPath$ = inDir$ + "consonants.wav"
+
+wav = Read from file: wavPath$
+# get object name
+objName$ = selected$: "Sound"
+
+# Set up formant variables
+timeStep = timeStepDefault
+numFormants = numFormantsDefault
+maxFormant = maxFormantDefault
+windowLength = windowLengthDefault
+preEmphasis = preEmphasisDefault
+
+# create a formant object
+selectObject: wav
+formantObj = To Formant (burg): timeStep, 
+				...numFormants, 
+				...maxFormant, 
+				...windowLength,
+				...preEmphasis
+
+# create text grid path, open TextGrid
+tgPath$ = inDir$ + objName$ + ".TextGrid"
+tg = Read from file: tgPath$
+
+numIntervals = Get number of intervals: tierNum
+
+# We had made a variable intNum, now
+# we'll use that as the counter variable
+for intNum from 1 to numIntervals
+
+	###### Get F1 and F2 from midpoint
+
+	selectObject: tg
+
+	#Get its label
+	label$ = Get label of interval: tierNum, intNum 
+
+	# If not blank
+	if label$ &lt;&gt; ""
+		beg = Get starting point: tierNum, intNum
+		end = Get end point: tierNum, intNum
+		midPoint = beg + ((end - beg) / 2)
+
+		selectObject: formantObj
+		# First argument is formant number
+		f1 = Get value at time: 1, midPoint, "Hertz", "Linear"
+		f2 = Get value at time: 2, midPoint, "Hertz", "Linear"
+
+		# Format the values and convert to string, 
+		# to make it easier to write to the spreadsheet
+		f1$ = fixed$: f1, 0
+		f2$ = fixed$: f2, 0
+
+		dataRow$ = wavName$ + sep$
+			...+ (string$:intNum) + sep$
+			...+ label$ + sep$
+			...+ (string$:midPoint) + sep$
+			...+ f1$ + sep$
+			...+ f2$ + sep$
+			...+ (string$:numFormants) + sep$
+			...+ (string$:maxFormant) + newline$
+
+		appendFile: outPath$, dataRow$
+	endif
+endfor
+</code>
+</pre>
+
+<p>Now we want to enclose all of this in the file loop we made earlier, with proper indentation. Delete the line where we hard-coded wavPath$:</p>
+
+<pre>
+<code class="language-ruby">
+###### Get a list of wav files in the input directory
+wavList = Create Strings as file list: "wavList", inDirWavs$
+
+numFiles = Get number of strings
+for fileNum from 1 to numFiles
+
+	selectObject: wavList
+	wavName$ = Get string: fileNum
+	appendInfoLine: wavName$
+
+	wavPath$ = inDir$ + wavName$
+	appendInfoLine: wavPath$
+
+	wav = Read from file: wavPath$
+	# get object name
+	objName$ = selected$: "Sound"
+
+	# Set up formant variables
+	timeStep = timeStepDefault
+	numFormants = numFormantsDefault
+	maxFormant = maxFormantDefault
+	windowLength = windowLengthDefault
+	preEmphasis = preEmphasisDefault
+
+	# create a formant object
+	selectObject: wav
+	formantObj = To Formant (burg): timeStep, 
+					...numFormants, 
+					...maxFormant, 
+					...windowLength,
+					...preEmphasis
+
+	# create text grid path, open TextGrid
+	tgPath$ = inDir$ + objName$ + ".TextGrid"
+	tg = Read from file: tgPath$
+
+	numIntervals = Get number of intervals: tierNum
+
+	# We had made a variable intNum, now
+	# we'll use that as the counter variable
+	for intNum from 1 to numIntervals
+
+		###### Get F1 and F2 from midpoint
+
+		selectObject: tg
+
+		#Get its label
+		label$ = Get label of interval: tierNum, intNum 
+
+		# If not blank
+		if label$ &lt;&gt; ""
+			beg = Get starting point: tierNum, intNum
+			end = Get end point: tierNum, intNum
+			midPoint = beg + ((end - beg) / 2)
+
+			selectObject: formantObj
+			# First argument is formant number
+			f1 = Get value at time: 1, midPoint, "Hertz", "Linear"
+			f2 = Get value at time: 2, midPoint, "Hertz", "Linear"
+
+			# Format the values and convert to string, 
+			# to make it easier to write to the spreadsheet
+			f1$ = fixed$: f1, 0
+			f2$ = fixed$: f2, 0
+
+			dataRow$ = wavName$ + sep$
+				...+ (string$:intNum) + sep$
+				...+ label$ + sep$
+				...+ (string$:midPoint) + sep$
+				...+ f1$ + sep$
+				...+ f2$ + sep$
+				...+ (string$:numFormants) + sep$
+				...+ (string$:maxFormant) + newline$
+
+			appendFile: outPath$, dataRow$
+		endif
+	endfor
+endfor
+</code>
+</pre>
+
+<p>That's working, but I'm noticing that my object window is filling up with files. Let's remove the objects we're creating in each loop. We can always comment these lines out if we run into problems. Add this just after the inner loop. (We want to remove them after we're done looping through all of the intervals in a given file):</p> 
+
+<pre>
+<code class="language-ruby">
+		removeObject: wav
+		removeObject: tg
+		removeObject: formantObj
+</code>
+</pre>
+
+<p>We should now have a fully functional formant reading script, but let's make it even better and add the code where we read in settings for specific files. Since this could change with each file, we put the settings code in the loop that reads in the files. If there's no entry for that object in the settings spreadsheet, we'll use the default values. Recall that we have to make sure our settings file exists (so we don't try to do things with an object that doesn't exist), and then that we've already opened it and its object number is saved in "settings".</p>
+
+<pre>
+<code class="language-ruby">
+	if settingsExist
+		selectObject: settings
+		# see if we have an entry for this object
+		# in the "objectName" column.
+		# Search column returns the row number if yes,
+		# 0 if no. I of course found this out by opening
+		# the table and tinkering with it.
+		rowNum = Search column: "objectName", objName$	
+		
+		# if we have an entry, set the formant
+		# values using the values in the table.
+		if rowNum &gt; 0
+			#Remember that this table returns strings
+			numFormants$ = Get value: rowNum, "numFormants"
+
+			# Better hope there are no extra spaces
+			# in the cell for the settings file, or this
+			# will fail
+			numFormants = number: numFormants$
+			
+			maxFormant$ = Get value: rowNum, "maxFormant"
+			maxFormant = number: maxFormant$
+		else
+			# If no entry, be sure to reset to defaults, otherwise
+			# we'll still have the values from the last time we
+			# went through the loop
+			numFormants = numFormantsDefault
+			maxFormant = maxFormantDefault
+		endif
+	endif
+
+	#Right now we aren't changing these via settings,
+	# so they don't need to be in the conditional
+	timeStep = timeStepDefault
+	windowLength = windowLengthDefault
+	preEmphasis = preEmphasisDefault
+</code>
+</pre>
+
+<p>Awesome! We have taken our component tasks, and Voltroned them into a powerful formant-reading machine. Below is a complete copy of the script, with some calls to removeObject for cleanup at the end, and a message to the user saying there were no errors.</p> 
+
+<p>LAST, VERY IMPORTANT STEP: Since this is a long, complicated script, we should add some "documentation" to the top with comments explaining how to use the script, and what assumptions it has, because a week from now we will not remember any of this, and we might want to share our script with others. If we designed this well, we should only have to change a few variables at the top and it should work. Here's my documentation (I changed the value of wd$ as well to use the current directory):</p>
+
+<pre>
+<code class="language-ruby">
+######################################################
+######################################################
+# Formant reading script, Daniel Riggs, 2016
+#
+# This script will open every .wav file and .TextGrid
+# in a folder, and record values for F1 and F2 from 
+# the midpoint of every non-blank interval.
+#
+# This script expects that in the same folder as this
+# script, there is another folder called "data", that 
+# contains .wav files and .TextGrid files with the same
+# name. It will create a folder "output", and make a 
+# value-separated spreadsheet (default is tabs).
+# The setup should be like this:
+# 
+# formantScript/
+#     thisScript.praat
+#     formantSettings.tsv
+#     data/
+#        sound1.wav
+#        sound1.TextGrid
+#        sound2.wav
+#        sound2.TextGrid
+#
+# 
+# CHANGE THESE VARIABLES IF NECESSARY:
+# This is the number of the tier in the TextGrids 
+# that contains the intervals you want.
+tierNum = 1
+#
+# Set to zero if you want it to automatically erase
+# an old spreadsheet
+askBeforeDelete = 1
+#
+# These are the default formant settings. You can 
+# change them if you wish
+timeStepDefault = 0
+numFormantsDefault = 5
+maxFormantDefault = 5500
+windowLengthDefault = 0.025
+preEmphasisDefault = 50
+#
+# You can change the formant settings for any single 
+# file as well by adding it to "formantSettings.tsv"
+# It's a tab-separated spreadsheet. Open it to see an
+# example. Note that it uses the object name to 
+# determine if the specific settings should be used
+# (this is the name of the Object in the Praat window
+# when you open the sound file). If it's not saved
+# as a tab-separated file after editing this will 
+# cause errors.
+#
+# This will use tabs to separate columns in the output
+# file. If you'd rather use commas, put a hashtag in
+# front of this line, and delete the hashtag in front
+# of the line that uses a comma
+sep$ = tab$
+#sep$ = ","
+#
+#####################################################
+#### Don't change anything below unless you want to 
+#### alter how the script works
+#####################################################
+clearinfo
+
+# Will use the directory containing the script
+wd$ = "./"
+
+# input directory
+inDir$ = wd$ + "data/"
+# I know I'll want only wav files
+inDirWavs$ = inDir$ + "*.wav"
+
+# make sure inDir$ exists
+if not fileReadable: inDir$
+	exitScript: "The input folder doesn't exist"
+endif
+
+settingsPath$ = wd$ + "formantSettings.tsv"
+# if it doesn't exist, print a 
+# warning. We won't stop the script,
+# because maybe we don't need a settings file
+if fileReadable: settingsPath$
+	# set up a variable so we can quickly make sure
+	# the Table exists later in the script
+	settingsExist = 1
+else
+	appendInfoLine: "WARNING: Settings file not found"
+	settingsExist = 0
+endif
+
+# out file
+outDir$ = wd$ + "output/"
+outPath$ = outDir$ + "formantResults.tsv"
+
+# if the output folder doesn't exist, create it.
+# This won't throw an error if it already exists.
+createDirectory: outDir$
+
+# see if our spreadsheet exists
+if askBeforeDelete and fileReadable: outPath$
+	pauseScript: "The data spreadsheet exists, overwrite it?"
+endif
+deleteFile: outPath$
+
+
+###### Write spreadsheet header to new file
+
+header$ = "fileName" + sep$
+	...+ "intervalNumber" + sep$
+	...+ "label" + sep$
+	...+ "midPoint" + sep$
+	...+ "f1" + sep$
+	...+ "f2" + sep$
+	...+ "numFormants" + sep$
+	...+ "maxFormant" + newline$
+
+appendFile: outPath$, header$
+
+###### Read in settings file
+if settingsExist
+	settings = Read Table from tab-separated file: settingsPath$
+endif
+
+###### Get a list of wav files in the input directory
+wavList = Create Strings as file list: "wavList", inDirWavs$
+
+numFiles = Get number of strings
+for fileNum from 1 to numFiles
+
+	selectObject: wavList
+	wavName$ = Get string: fileNum
+	appendInfoLine: wavName$
+
+	wavPath$ = inDir$ + wavName$
+	appendInfoLine: wavPath$
+
+	wav = Read from file: wavPath$
+	# get object name
+	objName$ = selected$: "Sound"
+
+	if settingsExist
+		selectObject: settings
+		# see if we have an entry for this object
+		# in the "objectName" column.
+		# Search column returns the row number if yes,
+		# 0 if no. I of course found this out by opening
+		# the table and tinkering with it.
+		rowNum = Search column: "objectName", objName$	
+		
+		# if we have an entry, set the formant
+		# values using the values in the table.
+		if rowNum > 0
+			#Remember that this table returns strings
+			numFormants$ = Get value: rowNum, "numFormants"
+
+			# Better hope there are no extra spaces
+			# in the cell for the settings file, or this
+			# will fail
+			numFormants = number: numFormants$
+			
+			maxFormant$ = Get value: rowNum, "maxFormant"
+			maxFormant = number: maxFormant$
+		else
+			# If no entry, be sure to reset to defaults, otherwise
+			# we'll still have the values from the last time we
+			# went through the loop
+			numFormants = numFormantsDefault
+			maxFormant = maxFormantDefault
+		endif
+	endif
+
+	#Right now we aren't changing these via settings,
+	# so they don't need to be in the conditional
+	timeStep = timeStepDefault
+	windowLength = windowLengthDefault
+	preEmphasis = preEmphasisDefault
+
+	# create a formant object
+	selectObject: wav
+	formantObj = To Formant (burg): timeStep, 
+					...numFormants, 
+					...maxFormant, 
+					...windowLength,
+					...preEmphasis
+
+	# create text grid path, open TextGrid
+	tgPath$ = inDir$ + objName$ + ".TextGrid"
+	tg = Read from file: tgPath$
+
+	numIntervals = Get number of intervals: tierNum
+
+	# We had made a variable intNum, now
+	# we'll use that as the counter variable
+	for intNum from 1 to numIntervals
+
+		###### Get F1 and F2 from midpoint
+
+		selectObject: tg
+
+		#Get its label
+		label$ = Get label of interval: tierNum, intNum 
+
+		# If not blank
+		if label$ <> ""
+
+			beg = Get starting point: tierNum, intNum
+			end = Get end point: tierNum, intNum
+			midPoint = beg + ((end - beg) / 2)
+
+			selectObject: formantObj
+			# First argument is formant number
+			f1 = Get value at time: 1, midPoint, "Hertz", "Linear"
+			f2 = Get value at time: 2, midPoint, "Hertz", "Linear"
+
+			# Format the values and convert to string, 
+			# to make it easier to write to the spreadsheet
+			f1$ = fixed$: f1, 0
+			f2$ = fixed$: f2, 0
+
+			dataRow$ = wavName$ + sep$
+				...+ (string$:intNum) + sep$
+				...+ label$ + sep$
+				...+ (string$:midPoint) + sep$
+				...+ f1$ + sep$
+				...+ f2$ + sep$
+				...+ (string$:numFormants) + sep$
+				...+ (string$:maxFormant) + newline$
+
+			appendFile: outPath$, dataRow$
+		endif
+	endfor
+
+	removeObject: wav
+	removeObject: tg
+	removeObject: formantObj
+
+endfor
+
+if settingsExist
+	removeObject: settings
+endif
+
+removeObject: wavList
+
+exitScript: "No errors! Check the spreadsheet"
+</code>
+</pre>
+
+{% include "templates/_footer.njk" %}

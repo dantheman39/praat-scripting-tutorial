@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - String variables</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Introduction to Strings</h1>
+
+<p>The previous section talked about the concept of variables, and used number variables as a starting point. However, sometimes we want to manipulate more than numbers.</p>
+
+<p>Let's remember how we assigned a number to a variable:</p>
+
+<pre>
+<code class="language-ruby">
+age = 34
+</code>
+</pre>
+
+<p>This is something slightly different:</p>
+
+<pre>
+<code class="language-ruby">
+name$ = "Dan"
+</code>
+</pre>
+
+<p>Two important details here: The variable name now ends in a dollar sign, and the value we assigned it is surrounded in double quotes (must be double! The single quotes mean something else...). This is how we indicate in Praat's language that instead of working with numeric data, we are working with "strings".</p>
+
+<h3>Hold on, what's a string?</h3>
+
+<p>A string is basically any character or combination of characters.</p>
+
+<h3>Why do I care? Why is there a difference between numbers and strings?</h3>
+
+<p>The main reason is because they take up different amounts of computer memory. Let's get nostalgic. A computer like the original Macintosh had only 128 kilobytes of memory (RAM)!!!!! That means that all computations the computer made had to take up less than this amount of space (like showing you all of the windows, processing clicks, making things appear on screen). At the time of writing, you can now attach a single file to an email that is up to 25Mb, which is 25000 kilobytes, about 200 times bigger than all of the computational space available to the first Mac!
+
+A string will take up more space in your memory than something like a number, so the computer needs to know how much space to set aside for a variable that will contain a string. Some of the important computer languages that we use today predate that old Macintosh, and these older computer languages require that the programmer choose what data type a variable would be to allow him or her to maximize to an extreme the available computational space. This focus on fine-grained control of memory still exists for anyone who's making a program that requires intensive computation and must be fast (like game programmers, for example). I don't want to go on a tirade about numbers of bits and 0's and 1's, so I leave it to the more curious to Google.</p>
+
+<p>For example, the languages Praat is written in (C and C++) are both older than the Mac, and they have several further subdivisions of types of numbers (like an integer, real, long, or double), all of which take up different amounts of space. This is all to say that instead of being so cranky and aggressive, imaginary interlocutor, you should thank the creators of Praat for simplifying it down to two for us, because they are doing a lot of work behind the scenes to hide all of this complexity.</p>
+
+<h3>But I still don't care. Why should I care?</h3>
+
+<p>You should care because Praat cares: If the program is expecting a string and you give it a number or vice versa, you will get an error and your script won't work. So there. Every time you type anything in a Praat script, or ask Praat to give you a value, you have to think about its data type (number or string).</p>
+
+<p>See the next section for some common string operations and some gotchas.</p>
+
+<h3>Note: What if I want double-quotes in my string?</h3>
+
+<p>Type this in and run it:</p>
+
+<pre>
+<code class="language-ruby">
+sentence$ = "Dan said "No way""
+appendInfoLine: sentence$
+</code>
+</pre>
+
+<p>You should have seen that this generates an error (our syntax coloring also served as a warning). The problem is that double-quotes have special significance for Praat: they enclose strings. To "escape" its special use, you have to type double-quotes twice:</p>
+
+<pre>
+<code class="language-ruby">
+sentence$ = "Dan said ""No way"""
+appendInfoLine: sentence$
+</code>
+</pre>
+
+
+    <p>Next page: <a href="strings2">Strings: continued</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>
+

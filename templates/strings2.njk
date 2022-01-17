@@ -1,0 +1,175 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Some common string operations</h1>
+
+<p>There will be a chapter much later that goes a little deeper into strings, but here we'll limit ourselves to a couple of quick pointers.</p>
+
+<h3>Combining (concatenating) strings</h3>
+
+<p>This one is generally pretty easy. You can concatenate strings by using the plus sign. Type this in, run it, and know truth:</p>
+
+<pre>
+<code class="language-ruby">
+subject$ = "Daniel"
+verb$ = "is"
+adv$ = "disarmingly"
+adj$ = "handsome"
+
+truth$ = subject$ + verb$ + adv$ + adj$ 
+appendInfoLine: truth$
+</code>
+</pre>
+
+<p>It printed "Danielisdisarminglyhandsome", which, while true, doesn't follow the norms of English orthography. This is our first heads up that we're going to have to think about strings in a much more detailed way when programming. We may think think of a space as a blank spot, or the absence of a letter, but for a computer it's the presence of an invisible space character. Let's fix the second to last line so it prints right, by adding strings with a space character between our variables:</p>
+
+<pre>
+<code class="language-ruby">
+truth$ = subject$ + " " + verb$ + " " + adv$ + " " + adj$
+</code>
+</pre>
+
+
+<h3>Non-printing (invisible) characters</h3>
+
+<p>Besides the space, there are other very important non-printing characters that you will want to be comfortable with. One is the tab character, which you can use to separate columns in a plain text spreadsheet (more on this in later chapters). In Praat you can make this happen by using tab$:</p>
+
+<pre>
+<code class="language-ruby">
+tabSepStr$ = "word1" + tab$ + "word2"
+appendInfoLine: tabSepStr$
+</code>
+</pre>
+
+<p>This is a special variable that Praat created internally (it's global variable, meaning "globally available", or available everywhere), so we don't have to create it or anything, we can just use it. (But don't overwrite it! Don't create variables named tab$!)</p>
+
+<p>The other big one we have to talk about is the newline character. Again, it's important for the uninitiated to note that whenever texts you see on your computer begin text on another line, this is not the absence of something, this is the presence of some type of invisible newline character.</p>
+
+<p>One painfully annoying issue to be aware of is that the character(s) used to create a line break is not the same on Windows and *nix. On Mac and Linux, one single character, the "newline" character typically represented as "\n" in programming languages, is enough to cause a line break. Windows has stuck with the archaic combination of two characters: the "return" character and the "newline" character, often represented as "\r\n". This harks back to the days of typewriters, where you would have to return the ink cartridge thingy to the left, and then turn the knob on the paper to create a new line. I have no idea why they are still using this on modern computers.</p>
+
+<p>Anyone who has had the misfortune of opening some kind of text file not created on Windows in "Notepad", its default text editor, will now understand why it put all of the file contents on one single line. It didn't think the character "\n" was enough to cause a line break. Again, please download a more civilized text editor that will open these files correctly. A good text editor also gives you the option to decide what type of newline character you want to use to save your files. If you're sharing a file with a Windows user, be neighborly and choose the appropriate new line character. These strange decisions made back in the 80's will still find a way to introduce bugs and rob some programmer of a perfectly good afternoon. You have been warned.</p>
+
+<p>In Praat you can use newline$, and it will convert this to the default on your system (\r\n for Windows, \n for Mac and Linux). If you want to write out a spreadsheet in Praat (something we'll be doing later), you can do something like this:</p>
+
+<pre>
+<code class="language-ruby">
+headerRow$ = "subject" + tab$ + "date" + tab$ + "vowel" + tab$ + "f1" + tab$ + "f2" + newline$
+</code>
+</pre>
+
+<p>Well, actually I'd recommend formatting it in a way that's easier to read and edit:</p>
+<pre>
+<code class="language-ruby">
+# the three periods tell Praat 
+# that the command continues on
+# the next line
+headerRow$ = "subject" + tab$ 
+		... + "date" + tab$
+		... + "vowel" + tab$
+		... + "f1" + tab$
+		... + "f2" + newline$
+
+# later write out rows in the 
+# same format
+</code>
+</pre>
+
+<h3>Gotchas</h3>
+
+<p>Remember that "3" and 3 are very different things for your computer. Look at the following code, and tell me what the value of the variable total$ is:</p>
+
+<pre>
+<code class="language-ruby">
+# number of syllables
+word1Syls$ = "3"
+
+word2Syls$ = "4"
+
+total$ = "3" + "4"
+appendInfoLine: total$
+</code>
+</pre>
+
+<p>The answer is "34"! Those aren't numbers, they're strings! It's no different to the computer than when we add "you " and "me". This is an error of a similar ilk:</p>
+
+<pre>
+<code class="language-ruby">
+word1Syls$ = "3"
+word2Syls = 4
+
+total$ = word1Syls$ + word2Syls
+</code>
+</pre>
+
+<p>Again take a close look at all of the details (presence/absence of dollar sign/double-quotes). Write this in and run it. You will find that it generates an error, because it doesn't make sense to add a string to a number, just like "hey" + "3" will not give us number.</p>
+
+<h3>"Casting" variables: converting to another format</h3>
+
+<p>Sometimes you will need to convert a number to a string or vice-versa, so that you could do something like this:</p>
+
+<pre>
+<code class="language-ruby">
+#Creating a row for our example from earlier
+subject$ = "jimmy"
+date$ = "2016-11-02"
+vowel$ = "e"
+
+#formants are numbers, of course, 
+# so no quotes, no dollar sign
+# on the variable
+f1 = 435.289315
+f2 = 2780.030258
+
+row$ = subject$ + tab$
+	... + date$ + tab$
+	... + vowel$ + tab$
+	... + f1 + tab$
+	... + f2 + newline$
+
+appendInfoLine: row$
+</code>
+</pre>
+
+<p>Enter this and run it, and again, we have the problem of trying to add numbers to strings. We can convert the number to a string easily with the string$: command, and convert to a number with the "number:" command":</p>
+
+<pre>
+<code class="language-ruby">
+age = 32
+
+# create a new string variable age$
+# convert the value of age to a string
+age$ = string$: age
+
+#Let's say a TextGrid interval contained
+# a number (number of syllables), and we 
+# want to do some calculations with it:
+numSyls$ = "5"
+
+#convert to number
+numSyls = number: numSyls$
+</code>
+</pre>
+
+<p>Note that the name of the command "string$" has a dollar sign because it returns a string, and the command "number" doesn't, because it gives you a number.
+
+<h3>Quick practice</h3>
+
+<p>Fix the broken script above that creates a row containing f1 and f2.</p>
+
+<h3>Final tip</h3>
+
+<p>If you don't want to have all of those numbers after the decimal, you can use the command "fixed$" instead of "string$", to convert to a string and specify how many decimal points you want. We'll talk more about the specifics of how these commands work (what a function is, what are the commas for, etc.) in the next chapter:</p>
+
+<pre>
+<code class="language-ruby">
+
+# the number "2" after the comma
+# indicates how many numbers we 
+# want after the decimal
+f1$ = fixed$: 435.289315, 2
+appendInfoLine: f1$
+</code>
+</pre>
+
+{% include "templates/_footer.njk" %}

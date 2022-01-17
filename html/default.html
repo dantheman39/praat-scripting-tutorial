@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Intro</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Praat scripting tutorial: Introduction</h1>
+
+<p><em>June 2016</em></p>
+
+<p>My first introduction to programming was writing a Praat script for my qualifying paper in phonology for the Spanish and Portuguese department at Georgetown University. For me, it was both maddening and strangely addictive. I enjoyed the rush of finally getting something to work after my computer and my ignorance had been beating me down for several hours, and I also felt the draw of being able to spend my time, not doing mind-numbingly repetitive tasks that are prone to errors which are hard to detect and fix, but learning a skill. It is absolutely true that learning to program is a huge investment of time, but it's an investment that can grow for many years to come, whereas clicking through the same menu millions of times to code your data is in my mind an equally exhausting, but less fruitful experience.</p>
+
+<h3>The goal of this tutorial</h3>
+
+<p>The obvious goal is to show you how to create Praat scripts for automating repetitive and time-consuming tasks. One thing that I think may differentiate this tutorial from others I've seen is that I plan to spend a little more time on basic programming concepts that will enable you to better understand the Praat manual, and to give you a functional approach to designing well-written scripts. <strong>This is not a replacement for the Praat Manual, and it is not a comprehensive list of all that Praat can do,</strong> though I do hope that if you read this tutorial you will come out with all of the tools you need to create your own scripts in Praat, and better understand when things inevitably go wrong. I hope to ease the beginner into being able to learn about Praat's capabilities of their own accord.</p>
+
+<p>I actually think the Praat scripting tutorial (found in the "Help" dropdown menu in Praat or online) is pretty good and quite complete, and there are a few quick and dirty intros into Praat scripting written by others that I quite enjoy (actually the newer one at <a href="http://praatscripting.lingphon.net/">praatscripting.lingphon.net</a> seems pretty nice and complete). That being said, I remember really struggling to understand it in the beginning: I probably read the manual ten times. I think that, though it is direct and to the point, a beginner doesn't always understand the significance of what they're reading, and doesn't know how to put it into practice. I remember sentences like the opening line of "Formulas 5. String functions": "String functions are functions that either return a text string or have at least one text string as an argument", and thinking they were basically gibberish. If I reach my goal, this sentence will make complete sense to you in a few short chapters. While there are other good tutorials out there, I think it's a good thing to be able to read a similar message said in a different way, so hopefully my contribution will be valid.</p>
+
+<h3>Advice</h3>
+
+<p>This is VERY important: Do not just read the tutorial and comprehend the examples, and do not just copy paste the examples. Programming is learned by doing. You have get that stuff "in your fingers" for you to remember it. Making mistakes and understanding how to make sense of your errors is one of the most important parts of learning to program, and you won't get that by staring at a bunch of abstract code. Take the time to try out the concepts, extend the examples, write your own scripts, and test your thinking.</p> 
+
+<p>Understand that you won't get everything right away, and I recommend being okay with tinkering with this stuff for a while, leaving it, and coming back to it. Eventually the basic concepts will make sense, and you'll feel like you can learn to do anything (if your experience is at all like mine).</p>
+
+<h3>Disclaimer</h3>
+
+<p>This tutorial comes with no warranty :) It is possible that I could be completely wrong at any point. I apologize ahead of time if at any point I have led you astray, program at your own risk.</p>
+
+<p>Please let me know what you think! Tell me if something wasn't explained well, or if there's some topic that I didn't talk about that should really be included.</p>
+
+<h3>This tutorial is in beta!</h3>
+
+<p>There are still a couple more chapters I would like to include, and I'm sure there are a number of ways that this can be improved, and I'm sure there are typos in the text and in the code somewhere, so please let me know. Motivate me by sending an <a href="contact">email</a> so I know that this wasn't all a big waste of time. Check back later and it should be better.</p>
+
+
+    <p>Next page: <a href="infoWindow">Info window</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>
+

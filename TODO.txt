@@ -1,0 +1,7 @@
+default
+  check links
+textEditor:
+  downloads
+theEnd
+  make next page optional
+downloads

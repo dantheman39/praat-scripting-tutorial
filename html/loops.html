@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Loops</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Loops</h1>
+
+<p>Now we are starting to get to the good stuff: loops. The whole point of programming is to automate some repetitive task, and we typically do that using loops: you run a series of commands over and over, changing a few values each time. I do have to warn you that along with conditionals, you will make a lot of mistakes until you get very comfortable with loops (and then afterwards too). Some keys to staying sane are to constantly test your assumptions and print to the info window, to spend the extra time writing small test scripts when you're writing a longer script (saving yourself time in the long run), and to develop the skill of breaking a bigger problem into smaller tasks, both when designing code and when solving unexpected behavior.</p>
+
+<p>VERY IMPORTANT: Type these examples in yourself. Do not just read along, and do not copy paste, unless you've already typed it in and are having trouble spotting a typo. Programming is learned by doing, and you are more likely to remember the syntax if you actually practice typing it in, and you will develop your debugging skills when you inevitably make mistakes.</p>
+
+<p>Every day I take public transit to work. Let's program a week of my routine. Type this in and run it.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+days = 7
+for day from 1 to days
+	appendInfoLine: "Day ", day, ": take the metro"
+endfor
+</code>
+</pre>
+
+<p>You should have seen this:</p>
+
+<pre>
+<code class="language-markdown">
+Day 1: take the metro
+Day 2: take the metro
+Day 3: take the metro
+... (up until 7)
+</code>
+</pre>
+
+<p>This is a "for" loop, and it's practically the only loop you need (though there are others). Let's break it apart. Firstly, it begins with "for" and ends with "endfor". Just like with if statements, WHENEVER YOU START A FOR LOOP, ALWAYS WRITE THE CLOSING ENDFOR RIGHT AWAY, and indent the code it contains. If you forget this step in a long script with several loops, you may have a lot of trouble fixing your mistake.</p>
+
+<p>Now, looking at the first line of the loop. Here's the general pattern of a loop in Praat: </p>
+
+<pre>
+<code class="language-markdown">
+for &lt;new variable to increment&gt; from &lt;start number&gt; to &lt;end number&gt;
+endfor
+</code>
+</pre>
+
+<p>In our case, we created the variable "day" (not the same as 'days'!). We gave it a start number of 1, and Praat automatically increases its value by 1 at every run through the loop (each 'iteration' through the loop) until 'day' is equal to our end number, 'days', at which point the loop will be terminated.</p>
+
+<p>You will often use for loops together with conditionals. Let's change the example so that if it's day 3 (maybe representing Wednesday), I'll take my bike. Try to do it yourself before looking at the next example:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+days = 7
+for day from 1 to days
+	if day == 3
+		appendInfoLine: "Day ", day, ": ride bike"
+	else
+		appendInfoLine: "Day ", day, ": take the metro"
+	endif
+endfor
+</code>
+</pre>
+
+<h2>Quick practice</h2>
+
+<p>
+<ol>
+	<li>Make a loop that counts to thirty.</li>
+</ol>
+</p>
+
+<p>Here's another example. The plan is to count by threes 10 times. Copy and run this code.</p>
+
+
+<pre>
+<code class="language-ruby">
+numToPrint = 10
+for count from 1 to numToPrint
+	appendInfoLine: count
+	count *= 3
+endfor
+</code>
+</pre>
+
+
+<p>Whoops, that wasn't right. I wanted to print 1 3 6 9 12 18 21 24 27, but I got 1 4! Walk through the code in your head and make sure you understand why this happens.</p>
+
+<p>We weren't just reading the variable 'count', we were also overwriting it every time we went through the loop with 'count *= 3'. Once Praat saw that 'count' was greater than 10, it stopped the loop.</p>
+
+<p>I think it'll be worth our time to go line by line and understand exactly what happened here.</p>
+
+<ul>
+	<li>Create a variable named 'numToPrint', set its value to 10.</li>
+	<li>Set up a loop. Create a variable named 'count', set its value to 1, and tell the loop to stop when 'count' is larger than 'numToPrint' (10).</li>
+	<li>Print 'count', its value is 1.</li>
+	<li>Change the value of 'count' to 'count * 3', so it now equals 3.</li>
+	<li>We've reached the end of the loop, go back to the top 'for'.</li>
+</ul>
+<ul>
+	<li>Praat increases 'count' by one so it now equals 4, and sees if it is less than 10. It is, so we run the code in the loop again...</li>
+</ul>
+
+<p>Hopefully you can now see the problem. Unless you're very aware of what you're doing it's usually safer to read the counter value, do your calculations with it, and save the result to a different variable, like in the following example.</p>
+
+<pre>
+<code class="language-ruby">
+numToPrint = 10
+multOfThree = 1
+for count from 1 to numToPrint
+	appendInfoLine: multOfThree
+	multOfThree = count * 3
+endfor
+</code>
+</pre>
+
+
+<p>Pay close attention to if you want to create this other variable inside or outside of the loop: here we created it outside (multOfThree = 1). An error I often made in the beginning that drove me nuts was when I would create a variable inside of the loop when it should've been outside. Let's say I want to continually multiply some number by 2 in a loop where I'm also doing other things:</p>
+
+
+<pre>
+<code class="language-ruby">
+numToPrint = 10
+
+for count1 from 1 to numToPrint
+	someNum = 2
+
+	# do some more stuff...
+
+	someNum *= 2
+	appendInfoLine: someNum
+endfor
+</code>
+</pre>
+
+<p>It prints 4 ten times. Let's walk through this code line by and see why it didn't work.</p>
+
+<ul>
+	<li>Create a numeric variable named numToPrint, set its value to 10.</li>
+	<li>Declare a for loop, create a variable called 'count1', set its value to 1 and tell the loop to stop when 'count1' is higher than 'numToPrint' (10).</li>
+	<li>Create a variable named 'someNum', set its value to 2.</li>
+	<li>Change someNum's value to 'someNum * 2'</li>
+	<li>Print 'someNum' to the console. It equals 4</li>
+	<li>Found the endfor, go back to the for, increment 'count1' by one, it now equals 2, which is less than 10, so go through the code in the loop again.</li>
+	<li>Set 'someNum' to 2...</li>
+</ul>
+
+<p>And here we see the problem. Every time we go through the loop, we reset someNum to 2, so the value we print will always be 4. It is of course totally normal and appropriate to create variables within a loop, but not if we want their value to "survive" each iteration (but see below), because every time we go through the loop they will be reset. If we want our changes to survive each iteration we want to create it outside of the loop. Let's change the code to get it to do what we want.</p>
+
+
+<pre>
+<code class="language-ruby">
+numToPrint = 10
+
+someNum = 2
+for count1 from 1 to numToPrint
+
+	# do some more stuff...
+
+	someNum *= 2
+	appendInfoLine: someNum
+endfor
+</code>
+</pre>
+
+
+<p>Walk through this code line by line and make sure you understand why this gives a different result.</p>
+
+
+<p>A word of warning. I said somewhat misleadingly that you should only create variables in a loop when you don't want them to survive it. Add a line to this script after the loop printing someNum. It is still set to the value it had at the last run of the loop. This is just a heads up that variables we create within a loop do persist, and still exist after the loop is finished. That means you have to be careful not to repeat names, unless you reset the value. Variables we created long ago and forgot about can sneak up on us, especially in longer scripts.</p>
+
+<h2>Quick practice</h2>
+
+<p>
+<ol>
+	<li>Make a loop that prints out numbers in hundreds (100, 200, 300, etc.) up to 1000.</li>
+</ol>
+</p>
+
+
+<h2>Practical Praat example</h2>
+
+<p>We're going to open a sound file that is already annotated with an interval TextGrid, and print the text in the intervals. You can use the TextGrid in sampleData/consonants.Collection. Open it up in Praat and select the TextGrid.</p>
+ 
+<p>More important than telling you the specific commands is to walk through the problem solving process. I encourage you to stop reading here and try to do this by yourself. If you get stuck, or once you have a working solution, come back and see what my version is. Also remember that when designing our scripts, we should always try our best, within reason, to make our code generalizable and therefore reusable: we don't usually want code that breaks when we use it with another file, or when we share it with a colleague, so keep that in mind.</p>
+
+<p>So let's start. My first order of business would be to use comments to write a summary of my goal, and sketch an outline of a plan that I can turn into code. </p>
+
+
+<pre>
+<code class="language-ruby">
+###### Print the text of all
+###### non blank labels of a text grid
+clearinfo
+
+# Select the text grid object
+
+# loop through each interval
+
+# Get its text
+
+# if the interval is not blank
+
+# print its value
+</code>
+</pre>
+
+<p>We already know how to select an object. For now, let's save the name of the TextGrid in a variable, and select it that way. In the future you might want to do something else, like for when we start looping through files:</p>
+
+<pre>
+<code class="language-ruby">
+# Select the text grid object
+objName$ = "consonants"
+
+tgName$ = "TextGrid " + objName$
+appendInfoLine: "TextGrid we're working with is: " + tgName$
+selectObject: tgName$
+</code>
+</pre>
+
+
+<p>In the object window, click on the Sound object, run the script and go back and see if it selected the TextGrid like we wanted.</p>
+
+<p>Recall that we have to know how many times we want to loop, and we want to figure this out programmatically. I'm not going to open my specific file in an editor window and see how many intervals there are (hard-coding it like 'intervals = 32'), the script would fail if one were added or removed, or if I reuse the script with a different file. So add the comment '# Get number of intervals' to our outline before the loop. Now let's find the correct calls for the commands. Make sure the TextGrid is selected in the object window, and see if you can find commands that can get the job done among those on the right.</p>
+
+<p>We can get the number of intervals with the 'Get number of intervals' command. Click on it to see if it needs arguments, and what type they are. We can see from the menu that pops up that we'll need to tell it the tier number. We're going to add a variable to save the tier number, and we'll put it toward the top of the file, so that we can change it easily in the future. The 'Get number of intervals' function will obviously return a number, so we'll use a numeric variable to save its result. Let's turn this into code:</p>
+
+<pre>
+<code class="language-ruby">
+###### Print the text of all
+###### non blank labels of a text grid
+clearinfo
+
+# Set up some variables to use throughout
+# the script
+objName$ = "consonants"
+intTier = 1
+
+# Select the text grid object
+tgName$ = "TextGrid " + objName$
+appendInfoLine: "TextGrid we're working with is: " + tgName$
+selectObject: tgName$
+
+# Get number of intervals
+numInts = Get number of intervals: intTier
+
+# loop through each interval
+
+# Get its text
+
+# if the interval is not blank
+
+# print its value
+</code>
+</pre>
+
+<p>Now we'll be ready to loop, but before setting it up, let's make sure we know how to get the text of an interval. Hopefully you've found the command 'Get label of interval', which takes two numeric arguments. It will obviously return a string since text grids can hold more than numbers. Let's write out the command, and before enclosing it in a loop, hard code it to get the label of interval 2, and run the script just to make sure we're calling the command correctly.</p>
+
+<pre>
+<code class="language-ruby">
+###### Print the text of all
+###### non blank labels of a text grid
+clearinfo
+
+# Set up some variables to use throughout
+# the script
+objName$ = "consonants"
+intTier = 1
+
+# Select the text grid object
+tgName$ = "TextGrid " + objName$
+appendInfoLine: "TextGrid we're working with is: " + tgName$
+selectObject: tgName$
+
+# Get number of intervals
+numInts = Get number of intervals: intTier
+
+# loop through each interval
+
+# Get its text
+intText$ = Get label of interval: intTier, 2
+
+# if the interval is not blank
+
+# print its value
+appendInfoLine: intText$
+</code>
+</pre>
+
+<p>It's working, so let's enclose it in the loop, and change the interval number to use a variable. Since we're going to simply go through every interval and read its text, we can just use the counter variable, here named 'intNum' for 'interval number'.</p>
+
+<pre>
+<code class="language-ruby">
+###### Print the text of all
+###### non blank labels of a text grid
+clearinfo
+
+# Set up some variables to use throughout
+# the script
+objName$ = "consonants"
+intTier = 1
+
+# Select the text grid object
+tgName$ = "TextGrid " + objName$
+appendInfoLine: "TextGrid we're working with is: " + tgName$
+selectObject: tgName$
+
+# Get number of intervals
+numInts = Get number of intervals: intTier
+
+# loop through each interval
+for intNum from 1 to numInts
+
+	#Get its text
+	intText$ = Get label of interval: intTier, intNum 
+
+	# if the interval is not blank
+
+	# print its value
+	appendInfoLine: intText$
+endfor
+</code>
+</pre>
+
+<p>Now it should print the label of every interval, but that includes blank intervals. Let's change that, being careful to correctly place our closing endif:</p>
+
+<pre>
+<code class="language-ruby">
+###### Print the text of all
+###### non blank labels of a text grid
+clearinfo
+
+# Set up some variables to use throughout
+# the script
+objName$ = "consonants"
+intTier = 1
+
+# Select the text grid object
+tgName$ = "TextGrid " + objName$
+appendInfoLine: "TextGrid we're working with is: " + tgName$
+selectObject: tgName$
+
+# Get number of intervals
+numInts = Get number of intervals: intTier
+
+# loop through each interval
+for intNum from 1 to numInts
+
+	#Get its text
+	intText$ = Get label of interval: intTier, intNum 
+
+	# if the interval is not blank
+	if intText$ &lt;&gt; ""
+		# print its value
+		appendInfoLine: intText$
+
+	endif
+
+endfor
+</code>
+</pre>
+
+<h2>Some debugging tips</h2>
+
+<p>I've heard it said (ya know, studies show and stuff), that people aren't naturally very good at logic. This means that we will inevitably make some mistakes, and logic mistakes can be the most maddening to track down. If you make a syntax mistake, Praat's compiler will throw an error and we can quickly see where we went wrong. When there's a logic mistake, the computer has faithfully obeyed our commands, but we told the computer to do something stupid.</p>
+
+<p>Obviously, your first line of defense is to print the value of variables and make sure things are going to plan. I also like to print little messages like "Text is blank" within my conditionals to make sure that my conditions are being correctly met.</p>
+
+<p>Another useful thing, particularly with loops, is to halt execution of the script at some point and poke around. Let's say I'm always getting unexpected behavior with the sixth item in a list:</p>
+
+<pre>
+<code class="language-ruby">
+numItems = 10
+for item from 1 to numItems
+
+	if item == 6
+		# this will kill the script
+		exit
+	endif
+
+	appendInfoLine: "Item number: ", item
+endfor
+</code>
+</pre>
+
+<p>You can then poke around and see, for example, which objects are open, which are selected, you can click "View &amp; Edit" and see what's in there, etc. You could also use the pauseScript command, which takes a message as an argument, and let's you decide between aborting and continuing:</p>
+
+<pre>
+<code class="language-ruby">
+numItems = 10
+for item from 1 to numItems
+
+	if item == 6
+		# this will pause the script
+		# and give you the option to
+		# continue or quit
+		pauseScript: "Do you want to keep going on?"
+	endif
+
+	appendInfoLine: "Item number: ", item
+endfor
+</code>
+</pre>
+
+<p>You also have to be very wary of reading any data that was entered by a human. For example, is there an extra space in a TextGrid interval? Is the tier I'm interested in actually Tier 2 in every file? Maybe I'll get the Tier by name. Did I enter the Tier name wrong on one of the files? Trust no one!</p>
+
+<h2>Conclusion</h2>
+
+<p>We're finally making more useful scripts! Think about the potential you've just unlocked. You can expand on these concepts to automate your tasks. In the next section we'll look at how to programmatically manipulate and loop through files. Once you get comfortable doing this, you will notice a big boost in quality of life, soften your wrinkles, and lose 10 pounds!</p>
+
+<h2>Further exercises</h2>
+
+<p>There is a tab-separated text file in our folder, named "sampleData/loopThroughColumn.tsv". A tab-separated file is a simple text file that can be used like a spreadsheet, where columns are separated by tabs, and rows are separated by endlines. Open this file in Praat by clicking on Open &gt; Read Table from tab-separated file. Figure out how to print the value of each row of the first column. My version is in answers/loopThroughColumn.praat . Obviously, try your hardest before looking at my version. Step two is to marvel at your new-found power to read in spreadsheets, and realize that you will quickly be able to generate them too.</p>
+
+<h2>Final note: other types of loops</h2>
+
+<p>Praat also has a "while" loop and a "repeat until" loop. A while loop will run continually until a value reaches a condition you set:</p>
+
+<pre>
+<code class="language-ruby">
+# Print out multiples of 5
+# but not past 101
+x = 0
+while x &lt; 101
+	appendInfoLine: x
+	x += 5
+endwhile
+</code>
+</pre>
+
+<p>"repeat until" is basically the same thing except it's guaranteed to run at least once:</p>
+
+<pre>
+<code class="language-ruby">
+# Print out multiples of 5
+# but not past 101
+x = 0
+repeat
+	appendInfoLine: x
+	x += 5
+until x &gt; 100
+</code>
+</pre>
+
+<p>Though these may at first seem more intuitive, USE THEM WITH CAUTION (or never). They are dangerous, because if your conditions are not met, the loop will run forever. This could result in your machine locking up if you're doing an operation that keeps eating memory, and you might have to force your machine to restart. If you're using one of these, make sure you have your "Force quit" window open and ready to kill Praat if you messed it up. You honestly don't need these, you can do everything you want using "for" loops and conditionals.</p>
+
+
+    <p>Next page: <a href="filePaths">File paths</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>
+

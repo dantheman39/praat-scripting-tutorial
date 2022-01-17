@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Object selection</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Object selection</h1>
+
+<p>Open all of the .wav and .TextGrid files in sampleData/ (if you haven't downloaded the accompanying files, go to the Downloads page from the top right menu). Though we already went through this, click on a sound file and look at the available commands on the right. Now click on a text grid and look at the commands. Now select a sound and its corresponding TextGrid together (ctrl), and look at the available commands. What we want to note here is that we have different commands available to us when different object types are selected. </p>
+
+<p>Now select a sound. Open a Praat scripting window, type this in, and run it:</p>
+
+<pre>
+<code class="language-ruby">
+numInts = Get number of intervals: 1
+</code>
+</pre>
+
+
+<p>This should generate an error saying that the given command is not available, which is true, because that command is only available when a text grid is selected, and right now a sound is selected (other times this error simply means you've spelled the command wrong).</p>
+
+<p>Hopefully you now see plainly why we need to learn how to select objects in Praat via script: we won't get very far without it.</p>
+
+<p>There are basically two ways we can select files in Praat: by using the object's name or by using its number in the object window. Look to the left of each object, and note that they have been assigned a unique number. The numbering starts at 1 when you open Praat, and will keep going up as you create more objects or open more files.</p>
+
+<p>Let's select some objects. In a blank scripting window, type in the two following ways we can select the object "Sound a", adjusting the numbers to work with what you currently have open.</p>
+
+<pre>
+<code class="language-ruby">
+# Use a number that exists for your
+# current Praat session
+
+#select by object number
+selectObject: 7
+
+#select by name
+selectObject: "Sound a"
+</code>
+</pre>
+
+<p>Now to make sure both commands work, click on a different object like "Sound ba", comment out the command you don't want to test (put a hashtag in front of one of the selectObject commands), and run the code. "Sound a" should be selected. Change which version of the command is commented and uncommented, and run it again.</p>
+
+<p>Which version you should use depends on your situation. At first glance, the numbers version may seem to be the lamer option. For one, those numbers are going to be different every time you use Praat, so we absolutely cannot hard-code them (object 7 will most likely be different the next time you run the script), but in truth there are some great advantages to using the numbers, and I generally prefer them. I'll explain why I think so after we do this next example.</p>
+
+<h2>An example using object selection: Extracting part of a sound</h2>
+
+<p>Select "Sound be" and "TextGrid be" and click View &amp; Edit, and note that the second tier has split this syllable into segments. Let's extract the sound in the second interval from this tier (the vowel "e"), and make it its own sound object. I strongly encourage you to try to write this yourself before continuing, you'll get a lot more out of it.</p>
+
+<p>But now here's my version: We want to extract from the sound object, so select it and find a command in the right that will extract part of the sound.</p>
+
+<p>(Jeopardy music)</p>
+
+<p>"Extract part" is in the Convert menu. Open it and see its arguments, and we see that the important thing we need to know is the time range (in seconds) of the section we want to extract. Let's convert this command to code, and save the result to a variable called "part". We still don't know the start and stop time, but we'll make some blank variables that we'll fill in in a second:</p>
+
+<pre>
+<code class="language-ruby">
+# Note, right now this code will not 
+# run. We're just getting started
+
+startTime = 
+endTime = 
+windowShape = "rectangular"
+relWidth = 1
+preserveTimes = 0
+
+#select the sound
+selectObject: "Sound be"
+
+part = Extract part: startTime, endTime, windowShape, relWidth, preserveTimes 
+</code>
+</pre>
+
+<p>We want to get the start and end time for Tier 2 Interval 2 from the TextGrid, so select it and find an appropriate command.</p>
+
+<p>We can use "Get starting point" and "Get end point". Make sure to include code to select the TextGrid object, and print out the value of 'part' at the end of the script.</p>
+
+<pre>
+<code class="language-ruby">
+# The interval and tier number 
+# we care about right now
+intNum = 2
+tierNum = 2
+
+selectObject: "TextGrid be"
+startTime = Get starting point: tierNum, intNum
+endTime = Get end point: tierNum, intNum
+windowShape = "rectangular"
+relWidth = 1
+preserveTimes = 0
+
+#select the sound
+selectObject: "Sound be"
+
+part = Extract part: startTime, endTime, windowShape, relWidth, preserveTimes 
+appendInfoLine: part
+</code>
+</pre>
+
+<p>Just as a reminder, when we created the new sound object with "Extract part", Praat returned its number so that we can easily select it later. Whenever we open a file or create a new object programmatically we can save its number as a variable like this, and we don't need to know its name beforehand. This is incredibly useful. Let's say I want to open all of the sound and TextGrid files in some folder, but all of the files obviously have different names. Every time I open a file, I save it's object number to a variable, and then I can refer to it throughout the script. This means that a well-written script will work on any folder full of similar files, on anyone's machine, even if the files have different names.</p>
+
+<h2>Selecting and deselecting multiple objects, understanding Praat's selection behavior</h2>
+
+<p>We can also select multiple items, using "plusObject", and we can deselect an item with "minusObject". Open a new scripting window and try these commands out yourself.</p>
+
+<p>We also have to understand the selection behavior when we open a file or create a new object. Select all of the objects (Ctrl + A). Now open the file be.wav again (I'm assuming you still have it open, open it an additional time). There are some very important details you should note. Firstly, Praat deselected all of the other files and selected the file we just opened. Also note that we have opened the same file twice, resulting in two objects with the same name (Sound be). This isn't a problem since they both have unique numbers (and we're not touching the original file yet, Praat made a copy of it). What will happen if we select the object by name? Click on some other object, and write a command to select "Sound be":</p>
+
+<pre>
+<code class="language-ruby">
+selectObject: "Sound be"
+</code>
+</pre>
+
+<p>It selects the object with the highest number (the most recently created one). This could be good or bad. It's good because this is usually the behavior we want, and Praat is less likely to throw an error. It's bad if we wanted to select the older file with the same name. In this case selecting the object via number is more precise.</p>
+
+<p>Also note that when you open a .Collections file, which is one file that can contain several other files (similar to a .zip file), all of the objects that were in the .Collections file will be selected. This can lead to some complicated issues for file selection. Read the Praat Tutorial chapter on object selection for some ideas, or write me asking that I include some tips in a later chapter.</p>
+
+<h2>Figuring out what's selected</h2>
+
+<p>Another pair of useful commands to know are "selected$" and "selected". They both take one argument, a string giving the object type. For example, select "Sound a", and run this code:</p>
+
+<pre>
+<code class="language-ruby">
+currentSoundName$ = selected$: "Sound"
+currentSoundNum = selected: "Sound"
+
+appendInfoLine: "The Sound named '", currentSoundName$, 
+	... "', number ", currentSoundNum, ", is currently selected."
+</code>
+</pre>
+
+<p>This is very useful if, for example, you know all of your .wav files have a corresponding TextGrid with the same name. Let's say my script already opened all of the .wav files in a folder, and I want to loop through them and also open their TextGrids (we will learn how to open files and loop soon):</p>
+
+<pre>
+<code class="language-ruby">
+## pretend we're in a loop
+
+objName$ = selected$: "Sound"
+
+# We can now build a Sound name
+# Note the space after Sound
+soundName$ = "Sound " + objName$
+
+# and a TextGrid name
+textName$ = "TextGrid " + objName$
+</code>
+</pre>
+
+<p>See the Object Selection chapter in the Praat manual for more options with the "selected" command.</p>
+
+<h2>Removing objects</h2>
+
+<p>A good script will clean up after itself. After opening a file, manipulating it, and saving your results, it's usually polite to remove the objects you opened (and ONLY the files you opened!). I'm not talking about deleting the files from the file system, rather I'm talking about the objects in the object window (again, they are copies of the files).</p>
+
+<p>You can do this two ways. One is to select the objects you want to remove, and then write "Remove" (no quotes, of course) on its own line. Another way, is to use "removeObject".</p>
+
+<pre>
+<code class="language-ruby">
+# You don't have to run this
+# if you don't want to remove anything
+
+#####Option A
+# You would obviously use variables here
+# instead of hard-coding the numbers
+selectObject: 8
+plusObject: 9
+Remove
+
+#####Option B
+removeObject: 10
+</code>
+</pre>
+
+<p>There is another possibility that as the Praat manual duly notes YOU SHOULD NOT DO:</p>
+
+<pre>
+<code class="language-ruby">
+# DON'T DO THIS
+select all
+Remove
+</code>
+</pre>
+
+<p>This would remove everything, including objects that your script didn't open or create. Imagine you share your script with little Billy. He spends a long time editing some files that he hasn't saved yet, he then runs your script, and you erase all of his work! Very rude. Little Billy doesn't like you now.</p>
+
+<p>There are more options, noted in the Praat manual. That's your homework. Read chapter 4 of the scripting tutorial, "Object selection", it's a good chapter.</p>
+
+<h2>Pedantic final note: Selection in other languages</h2>
+
+<p>This way of selecting objects is very unique to Praat, as far as I know you won't see something like it in other programming languages. Praat's object selection is in an awkward place between imitating mouse-clicks and a pure "programmatic" approach.</p>
+
+<p>For those of you who are thinking about learning another language in the future, it would be good for you to know that in other languages, you usually run a command on the object (using the variable name), you don't select an object and then run a command. For example, compare the Praat way, and compare it with how something similar would be done in a popular language like Python:</p>
+
+<pre>
+<code class="language-ruby">
+### Praat version
+selectObject: sound
+part = Extract part: startTime, endTime, "rectangular", 1, 0
+</code>
+</pre>
+
+<pre>
+<code class="language-python">
+#### Python version
+
+#give the variable name of our TextGrid object
+part = sound.ExtractPart(startTime, endTime, "rectangular", 1, 0)
+
+# Note there is no need to select an object
+# we would instead call commands that are "inside"
+# of the object (often called "methods")
+</code>
+</pre>
+
+<p>Praat's need for selecting objects can be kind of a pain, personally I would love to see Praat move to the more "normal" way, but I guess it's not that bad, and these guys have other things to do with their time. (Thank you for Praat!)</p>
+
+<h2>Exercises</h2>
+
+<p>We already practiced a bunch, but as I said earlier, it's really worth your time to read chapter 4 of the Praat Scripting Tutorial on Object Selection.</p>
+
+
+    <p>Next page: <a href="loops">Loops</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>

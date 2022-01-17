@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Conditionals</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Creating conditions</h1>
+
+<p>In programming, as in nearly all other areas of life, you will only do certain actions under certain conditions. If I say to my parents, "Hey, can I borrow some money?", their answer will most likely be "That depends. How much?". If I ask for something under 50 bucks they'll probably loan it to me, but if I asked for a couple thousand, it would be a hard no, <i>unless</i> I really needed it for something important, and of course if they had the money.</p>
+
+<p>Notice all of the conditions being put on whether or not they're going to loan me the money. We can do the same thing in programming. Imagine we want to extract sections of an audio file only if their text matches "winnebago". Well, we need to learn how to do that to make our programs useful. Let's continue with the money loaning example. Let's first set it up so they are cold-hearted and will not loan me money under any cirumstances.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+# first let's set a variable indicating if
+# I asked for money, and here we'll set it
+# to true.
+askedForMoney = 1
+
+# Let's also initialize their answer to false.
+# Under the right conditions, they'll change it 
+# to true.
+willLoan = 0
+
+if askedForMoney
+	#right now they will not loan any money
+	willLoan = 0
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<p>We just learned the all-important if conditional. Look closely at some important details: We have to write "if", and importantly, a closing "endif" on a later line. MAKE THIS A HABIT: BEFORE WRITING ANY MORE CODE, ALWAYS WRITE AN ENDIF IMMEDIATELY AFTER TYPING THE IF. If you forget one in a long series of conditions, it can be very hard to figure out where it should be. So when I first typed that line, it looked like this:</p>
+
+<pre>
+<code class="language-ruby">
+if
+endif
+</code>
+</pre>
+
+<p>Also extremely important for your sanity: Note how I indented the code between the surrounding if statement. ALWAYS ADD ONE LEVEL OF INDENTATION TO THE CODE BETWEEN THE SURROUNDING IF AND ENDIF. As we'll see more clearly later when we add more complexity, this highly increases the readability of your code, will make it much easier to visualize your logical structure, and makes it easier to fix mistakes. You can use tabs or spaces (usually four spaces for each level, but some people do two.).</p> 
+
+<p>One more thing, I kind of used a shorthand in the example above:</p>
+
+<pre>
+<code class="language-ruby">
+# initialize some variables
+askedForMoney = 1
+willLoan = 0
+happy = 0
+
+#These two conditionals are the same
+
+if askedForMoney
+	willLoan = 0
+endif
+
+if askedForMoney == 1
+	willLoan = 0
+endif
+
+# you can also use "not" when it makes sense
+if not askedForMoney
+	happy = 1
+endif
+</code>
+</pre>
+
+
+
+<h3>RANT</h3>
+
+<p>Whether you should use tabs or spaces to indent is something programmers love to argue about, but the correct answer is definitely tabs, no matter what those other idiots say :) . A tab is a single character so it's easy to add and delete. One complaint from the pro-spaces lobby is that tabs take up too much space, and pretty soon you have to start scrolling to the right to see your code. A big plus of using a good text editor like Sublime is that you can change the appearance of the tab in your settings. If your indentations are too big, go to the settings and make the tab appear smaller.</p> 
+
+<p>Another major plus to using a good text editor is that you can select big blocks of code and press tab (or shift+tab to go backwards), and this will indent all of the selected code one level. If you tried to do that in Praat's Script Editor it would erase all of the code and insert a tab. If Obama were to take away this feature from all our text editors, I would move to Canada. It's that convenient.</p>
+
+<h3>ENDRANT</h3>
+
+<p>Back to conditionals. Let's say my parents are still terrible people, and they only really love my big sister Alison. Let's add a further condition: When asked for money from a child, only lend it if that child is Alison.</p>
+
+<pre>
+<code class="language-ruby">
+askedForMoney = 1
+child$ = "Alison"
+
+willLoan = 0
+
+if askedForMoney
+	if child$ == "Alison"
+		willLoan = 1
+	endif
+endif
+
+appendInfoLine: willLoan
+
+</code>
+</pre>
+
+<p>As always, type this stuff in yourself, so that you can learn through your errors. Don't just read along, programming is learned by doing. Check your work, comment out the line where child$ = "Alison" and add one saying child$ = "Dan", and make sure it comes back false.</p>
+
+<p>Note that we now have nested if statements, and that we are consistently following our indentation scheme. Also, note that I have used two equal signs. That's to make the distinction between the <i>assignment operator</i> (=), and "is equal to" (==). Praat's language doesn't require this distinction, we could've used a single equals sign, but most languages do, and it's good practice. You will better understand the conceptual difference between checking for equality and assigning a value to a variable, and if you learn another language you'll already be in the habit.</p> 
+
+<p>Now let's say it turns out my parents just don't like me, since they will also lend money to my brother Colin. Let's make a condition where "If asked for money and the child is Alison or Colin, loan the money".</p>
+
+
+<pre>
+<code class="language-ruby">
+askedForMoney = 1
+
+#child$ = "Alison"
+#child$ = "Dan"
+child$ = "Colin"
+
+willLoan = 0
+
+if askedForMoney
+	if child$ == "Alison"
+		willLoan = 1
+	elif child$ == "Colin"
+		willLoan = 1
+	endif
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<p>Here we've been introduced to "elif", meaning "else if". We could also add "else", which would mean "in all other cases".</p>
+
+<pre>
+<code class="language-ruby">
+if askedForMoney
+	if child$ == "Alison"
+		willLoan = 1
+	elif child$ == "Colin"
+		willLoan = 1
+	else
+		willLoan = 0
+	endif
+endif
+</code>
+</pre>
+
+<p>Let's take a step back, and look at what goes after the "if". Essentially, it's either a boolean value, or something that evaluates to a boolean value (0 or 1). Here are some more comparison operators that are very useful (a and b in the table below are variable names):</p>
+
+<table>
+	<tr>
+		<th>Operator</td>
+		<th>Use</td>
+	</tr>
+	<tr>
+		<td>a &lt; b</td>
+		<td>True if a is less than b</td>
+	</tr>
+	<tr>
+		<td>a &gt; b</td>
+		<td>True if a is greater than b</td>
+	</tr>
+	<tr>
+		<td>a &lt;&gt; b</td>
+		<td>Not equal: true if a is not the same value as b</td>
+	</tr>
+	<tr>
+		<td>a &lt;= b</td>
+		<td>True if a is less than or equal to b</td>
+	</tr>
+	<tr>
+		<td>a &gt;= b</td>
+		<td>True if greater than or equal to b</td>
+	</tr>
+</table>
+
+<p>Things can be a little different for strings, and different programming languages can have very different behavior. Here are some comparison operators for strings in Praat, in addition to "is equal to" (==):</p>
+
+<table>
+	<tr>
+		<th>Operator</td>
+		<th>Use</td>
+	</tr>
+	<tr>
+		<td>a$ &lt; b$</td>
+		<td>True if a is earlier in alphabetical order</td>
+	</tr>
+	<tr>
+		<td>a$ &gt; b$</td>
+		<td>True if a is later in alphabetical order</td>
+	</tr>
+	<tr>
+		<td>a$ &lt;&gt; b$</td>
+		<td>True if a is not the same value as b</td>
+	</tr>
+</table>
+
+<p>A really common thing to do is check if a string is blank, like if we want to ignore intervals in a TextGrid that don't have a label.</p>
+
+<pre>
+<code class="language-ruby">
+#if label is not blank
+if label$ <> ""
+	#do some stuff
+endif
+</code>
+</pre>
+
+<p>Remember that I said that you can include something that evaluates to true or false (0 or 1) after the if. We could therefore even do mathematical operations:</p>
+
+
+<pre>
+<code class="language-ruby">
+possiblePoints = 90
+passingGrade = 0.60
+message$ = "You have passed"
+
+studentScore = 35
+
+if studentScore / possiblePoints &lt; passingGrade
+	message$ = "You have failed"
+endif
+
+appendInfoLine: message$
+</code>
+</pre>
+
+<p>You of course will have to be careful about order of operations (see the Praat Manual, search for Operators), or just enclose things in parentheses: (studentScore / possiblePoints) &lt; passingGrade.</p>
+
+<p>You can also use "and" or "or" to combine conditions into one statement. We could rewrite our series of conditions about my parents never loaning me money:</p>
+
+<pre>
+<code class="language-ruby">
+#child$ = "Alison"
+#child$ = "Dan"
+child$ = "Colin"
+
+askedForMoney = 1
+willLoan = 0
+
+if askedForMoney and (child$ == "Alison" or child$ == "Colin")
+	willLoan = 1
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<p>Though that may seem more succint, I honestly avoid using "and" or "or", especially "or" and combinations of the two like we just saw. In my opinion it makes it a little harder to read and parse, and it's easier to make logic mistakes. My personal policy is that if writing a little more code will make something easier to change or understand, I'll type the extra code.</p> 
+
+<h2>Creating variables in conditions, beware!</h2>
+
+<p>Type in the following code, which is similar to our examples above. Run it once with child$ = "Colin", and once with child$ = "Dan":</p>
+
+<pre>
+<code class="language-ruby">
+#child$ = "Alison"
+child$ = "Dan"
+#child$ = "Colin"
+
+askedForMoney = 1
+
+if askedForMoney and (child$ == "Alison" or child$ == "Colin")
+	willLoan = 1
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<p>This caused a somewhat sneaky error. Can you figure out what's wrong? The variable "willLoan" was created and given a value within a conditional. This worked fine when the condition was met (when "Colin" was the child), but when we changed the value to "Dan", the condition wasn't met, and "willLoan" never got created. There are two basic ways to safeguard against this: give the variable a default value outside of a conditional (option "a" below), or make sure to use an "else" statement to end your "if" (option "b"):</p>
+
+<pre>
+<code class="language-ruby">
+#######OPTION A
+
+# give will loan a default value
+willLoan = 0
+
+if askedForMoney and (child$ == "Alison" or child$ == "Colin")
+	willLoan = 1
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<pre>
+<code class="language-ruby">
+#######OPTION B
+if askedForMoney and (child$ == "Alison" or child$ == "Colin")
+	willLoan = 1
+else
+	willLoan = 0
+endif
+
+appendInfoLine: willLoan
+</code>
+</pre>
+
+<h2>Exercises</h2>
+
+<p>1. Write a script describing the conditions for your parents to loan you money, including:</p>
+<ul>
+	<li>No problem if it's under 50 bucks</li> 
+	<li>Over a thousand dollars only if they have some extra cash and it's important, but no more than 2000</li>
+</ul>
+
+<p>Use appendInfoLine to see what happened if something goes wrong, and be sure to test your conditions thoroughly and make sure they always give the desired result.</p>
+
+<p>2. Read the Praat manual page on operators.</p>
+
+
+    <p>Next page: <a href="objectSelection">Object selection</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>

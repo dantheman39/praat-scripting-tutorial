@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Finding commands</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Reproducing Praat commands</h1>
+
+<p>We are now ready to start talking about doing useful things in Praat. You are starting to understand how to use variables, and that you have to pay attention to the type of variable (number or string). What you need now to be able to use this knowledge is to find out what Praat's capabilities are, and later to repeat the actions you want. So how do you find out what you are able to do with Praat's scripting language? What objects and commands are available to you?</p>
+
+<p>Let's jump right in. If you haven't already downloaded the zip file that accompanies the tutorial, go to the Downloads page in the top right menu, and put it in your "Documents" folder. Open Praat, and open consonants.wav and consonants.TextGrid found in the folder "praatTutorial/sampleData/". You should see a Sound object and a TextGrid object in Praat's object window, both named "consonants".</p>
+
+<h2>Scripts are not mouse clicks</h2>
+
+<p>Normally, in point and click interaction with Praat, you would click View &amp; Edit, and use the dropdown menus and mouse clicks to do your analyses. These are called Editor Windows. IN PRAAT SCRIPTS, YOU WILL ALMOST NEVER BE USING THESE WINDOWS, and there are good reasons for it. Don't think about scripting the editors until you are already comfortable with scripting, and you know exactly what you're doing, because 99% of the time there is a better way. It's important for you to understand that your script is not a copy of what you do with your mouse. (What would happen if a popup window from another application came up? Mice work with coordinates on the screen, what if your window is not in exactly the same place the next time you run the program?)</p> 
+
+<p>Instead of clicking View &amp; Edit, look at the other buttons on the right panel of the object window (such as Draw..., Extract -, or Query -). The commands contained in these buttons are the ones we will emulate in our scripts. Start to click on them to get some ideas. Click on the Sound object so it's the only one highlighted. Look at the buttons on the right, see what's available. Now click on the TextGrid object. Note that the buttons have changed. Check them out, and see what you can do.</p>
+
+<p>Let's say you're planning on doing some formant analyses. Click on the Sound object again. Click "Analyse spectrum &gt; To Formant (burg)..." and accept the default values. This will create a Formant object. Make sure it's selected and check out the buttons on the right, particularly Query-. Everything available to you in the familiar Editor Window, and much more, is available to you through these commands. Similarly, if you want to look at Pitch, you can select a Sound object and create a Pitch object (Analyse periodicity-), and likewise for intensity. Take a peek at what kind of objects Praat has in the manual, search for Types of objects. There's a lot of stuff there I had never heard of before but ended up making my life easier.</p>
+
+<p>So now let's start thinking about how to turn these commands into code. Remove that Formant object we created, and open a new script from Praat &gt; New Praat Script, save it as something like "commandsPractice.praat". Click on the Sound object to select it, select Analyse spectrum - To Formant (Burg)... , but don't hit enter, leave the popup window open and visible. We're going to turn this into code:</p> 
+
+<pre>
+<code class="language-ruby">
+formObj = To Formant (burg): 0, 5, 5500, 0.025, 50
+</code>
+</pre>
+
+<p>Analyze this carefully and pay attention to the details. Set aside for a moment the initial "formObj = ", we'll come back to that. We typed the (case-sensitive!) name of the command from the Object Window, followed by a colon, then we typed a list of numbers separated by commas. These numbers correspond to what we would enter in the window that pops up when we use the mouse (0=Time step, 5=Max number of formants, 5500=Maximum Formant, 0.025=Window length (remember the leading zero!), and 50=Pre-emphasis from). Boom! We're scripting!</p>
+
+<h2>Functions</h2>
+
+<p>But let's stop a second and look a little closer at what's happening, and run through some terminology. "To Formant (burg)" is the name of a Praat <em>function</em> that we can <em>call</em> when a Sound object is selected. What do these things mean, really?</p>
+
+<p>A <em>function</em> is essentially a series of commands that have been saved somewhere, and when we <em>call</em> it, we're asking the function to run the commands it contains. We give the function the information it needs to do its job properly (its <em>arguments</em>), and the function will usually <em>return</em> something to us. This is analogous to when we order an item from a shopping website like Amazon: we place an order, give them our money and address, and they return a book. A call to an imaginary Amazon book order might look like this:</p>
+
+<pre>
+<code class="language-ruby">
+# set up some variables
+bookTitle$ = "Turtles of Oakland County"
+dollars = 19.99
+address$ = "1325 Elm St."
+
+book$ = Order book: bookTitle$, dollars, address$
+</code>
+</pre>
+
+<p>Here, the name of the function is "Order book". Its arguments are "bookTitle$", "dollars", and "address$", and it will return a book to us, which we have saved in the variable "book$". They carried out a ton of steps that we didn't have to think about (they got the book from the warehouse, packaged it, mailed it, etc.), but for all we care, we gave them what they needed and got a book back.</p>
+
+<p>Remember that Praat only has two data types: numbers and strings. We have to be careful to use the right one for the arguments and the return value (here, dollars is a number, and everything else are strings). We also have to put the arguments in the order that the function expects. The arguments are preceded by a colon, and separated by commas. Note that not all functions (or "commands", in this tutorial I'm using "commands" interchangeably with functions) require arguments, and not all functions return a value.</p>
+
+<p>Coming back to our real-life example, look again at our call to "To Formant (burg)". We called it with its arguments, all of which are numbers in this case, and are listed in the expected order. We also saved its "return" value to a variable name that we created, "formObj", which we'll talk about in a minute.</p>
+
+<p>In a later chapter (Procedures) we learn how to make our own functions (though they're technically not functions...)</p>
+
+<h2>Prefer using variables instead of writing in arguments</h2>
+
+<p>In our current call to "To Formant (burg)", we wrote in the arguments (the numbers) directly. I'll reprint it here so you don't have to scroll back up:</p>
+
+<pre>
+<code class="language-ruby">
+formObj = To Formant (burg): 0, 5, 5500, 0.025, 50
+</code>
+</pre>
+
+<p>When you write in a bare value like this, and don't use a variable, this is called "hard-coding", and please trust me when I say that for the most part you want to avoid this. Compare to this version:</p> 
+
+<pre>
+<code class="language-ruby">
+timeStep = 0
+maxNumForms = 5
+maxFormHz = 5500
+winLength = 0.025
+preEmph = 50
+
+formObj = To Formant (burg): timeStep, maxNumForms, maxFormHz, winLength, preEmph
+</code>
+</pre>
+
+<p>Now this is admittedly a lot more typing than our previous version, but it's ultimately easier to maintain. Remember that our scripts will become more complicated: Suppose I want to call "To Formant (burg)" multiple times, or imagine that I want to use different formant settings for different individuals. I will have to hunt through my script and change a bunch of numbers, which is very error-prone and time-consuming. If I set up some variables, maybe toward the top of my script if they're going to be used throughout the whole thing, I can easily change them once.</p> 
+
+<p> Using variables also greatly increases the readability of your code. Pop quiz: Go to the hard-coded version and tell me what each of those numbers represents. Now do the same for the version using variable names. "timeStep" will make more sense to you a few weeks from now than "0".</p>
+
+<h2>The return value of functions that create objects</h2>
+
+<p>Our fake "Order book" function returned a string to us, so we saved it to a string variable with a dollar sign. But what did the To Formant function return? Add a line to print out the value of "formObj" to find out what it returned.</p>
+
+<p>The "To Formant (burg)" function creates a Formant object, and also returns the number of the object that was created. Look to the left of the Formant object in the Object Window, the number should be the same as the value of our variable "formObj". You'll se that most Praat functions that create an object (including ones that open files), will return an object number. This will be very useful for selecting this object later, which we'll talk more about soon. </p>
+
+<p>We could have called "To Formant (burg)" without saving the variable, but that will complicate our lives greatly when we want to select the object we created.</p>
+
+<p>(Final note: Not all functions return a value, they're called "void" functions, the more you know). Now we should practice a little more before moving on.</p> 
+
+<h2>Exercises</h2>
+
+<p>1. Let's do at least two more calls to Praat functions. Comment out the code we have so far by putting hashtags in front of every line. Go back to the object window, and select the TextGrid. Find the commands in the right menus for getting the number of intervals on tier 1, and get the label of interval 10 on tier 1. Translate those commands into code, save their values into variables, and print them to the info window. Hint: Careful with argument and return data types!</p>
+
+<p>2. Read the chapter "Scripting 2. How to script settings windows" in the Praat Scripting Tutorial. Hopefully it will all make more sense to you now if it didn't before.</p>
+
+<p>3. Save your script. Go to Praat &gt; New Praat Script. In the new Editor window, select Edit &gt; Paste history. This shows us all of the commands we've run! Now don't get too excited, a lot of people seem to suggest that writing a script is simply a matter of copying these commands. They are misleading you. You need to know more about object selection and knowing when a command is available, and creating conditions and loops, for you to know what to keep and what to throw away from the command history. Those people forget how little they knew when they were true beginners. The paste history command is very good for finding the correct call when you can't seem to get it right, though. In the next section we briefly talk about object selection, then we move on to real programming: loops and stuff.<p>
+
+<h2>Notes</h2>
+
+<p>Praat has changed and updated the syntax of its scripting language, so you will still find scripts written by others using a different format. Instead of writing this:<p>
+
+<pre>
+<code class="language-ruby">
+formObj = To Formant (burg): 0, 5, 5500, 0.025, 50
+</code>
+</pre>
+
+<p>You might see something like this:</p>
+
+<pre>
+<code class="language-ruby">
+To Formant (burg)... 0, 5, 5500, 0.025, 50
+</code>
+</pre>
+
+<p>Don't be afraid, but rest assured that the newer syntax has a number of advantages. You used to have to know when to surround a variable with single quotes, which never made sense to me back then. Make sure you're using an up-to-date version of Praat to benefit from it. If you're getting weird errors from an older script, try changing it to the new syntax and see if it goes away.</p>
+
+
+    <p>Next page: <a href="conditionals">Conditionals</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>
+

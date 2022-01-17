@@ -1,0 +1,229 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>Looping through directories and files</h1>
+
+<p>Since you already know how to read files, and you know how to loop, this should be cake. If you want to run your script on every item contained in a folder, you need to loop over its contents.</p>
+
+<p>To get a list of files in a directory, use "Create Strings as file list", which is a command in the "New" dropdown menu. ("Create Strings as directory list" will give you a list of folders). Try it out with the mouse to see what arguments the command needs, and what it returns to you.</p>
+
+<p>The first argument is the name of the Strings object you will create, and the second is the path to a folder. Take a look at the strings object it created for you. Click on View &amp; Edit, see what's in there. Look at the available commands in the buttons on the right in the object window.</p>
+
+<p>Using this information, figure out how to write a script that gets a list of files in your Downloads folder, and prints their names to the info window. Try it out and come back to see my version below.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+wd$ = homeDirectory$ + "/Downloads/"
+
+downloadsList = Create Strings as file list: "downloadsList", wd$
+
+# not necessary here, just OCD
+selectObject: downloadsList
+
+numFiles = Get number of strings
+for fileNum from 1 to numFiles
+	fileName$ = Get string: fileNum
+	appendInfoLine: fileName$
+endfor
+</code>
+</pre>
+
+<p>One potential issue with this is that we got all of the files in that folder. It's typically much easier and safer to open, for example, all of the .wav files only. We can do this with a "wildcard", which is a character that will match anything, and in this case is the asterisk "*". Let's get a list of all of the .wav files in praatTutorial/sampleData/fileLooping . Note the variables I set up for the path here:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleData/"
+
+inDir$ = wd$
+inDirWavs$ = inDir$ + "*.wav"
+appendInfoLine: inDirWavs$
+
+wavList = Create Strings as file list: "wavList", inDirWavs$
+
+selectObject: wavList
+
+numFiles = Get number of strings
+for fileNum from 1 to numFiles
+	fileName$ = Get string: fileNum
+	appendInfoLine: fileName$
+endfor
+</code>
+</pre>
+
+<h2>Heads up with chooseDirectory</h2>
+
+<p>Remember the chooseDirectory command from the last lesson, that lets the user choose a folder for us? Enter this and run it:</p>
+
+<pre>
+<code class="language-ruby">
+inDir$ = chooseDirectory$: "Choose the folder containing your wav files"
+appendInfoLine: inDir$
+</code>
+</pre>
+
+<p>The path that it returns doesn't have a slash at the end, so we'll have problems if we do this:</p>
+
+<pre>
+<code class="language-ruby">
+inDir$ = chooseDirectory$: "Choose the folder containing your wav files"
+appendInfoLine: inDir$
+
+# watch out here!
+outPath$ = inDir$ + "jazz.wav"
+appendInfoLine: outPath$
+</code>
+</pre>
+
+<p>If you look closely at the result, it's not what we want, since we're missing a slash. If I chose the desktop, I would get this:</p>
+
+<pre>
+<code class="language-markup">
+/home/daniel/Desktopjazz.wav
+</code>
+</pre>
+
+<p>That means we'll get a file called "Desktopjazz.wav" in my home folder! Here's my preferred way, since I don't have the habit of prepending slashes to names of files:</p>
+
+<pre>
+<code class="language-ruby">
+inDir$ = chooseDirectory$: "Choose the folder containing your wav files"
+
+#this makes things easier for me
+inDir$ = inDir$ + "/"
+
+appendInfoLine: inDir$
+
+# Now we should be good
+outPath$ = inDir$ + "jazz.wav"
+appendInfoLine: outPath$
+</code>
+</pre>
+
+<p>Lastly, you'll have to add your wildcard if you only want files of a certain extension:</p>
+
+<pre>
+<code class="language-ruby">
+inDir$ = chooseDirectory$: "Choose the folder containing your wav files"
+inDir$ = inDir$ + "/"
+inDirWild$ = inDir$ + "*.wav"
+
+wavList = Create Strings as file list: "wavList", inDirWild$
+</code>
+</pre>
+
+<h2>Practice: Make a TextGrid for each .wav file in a folder</h2>
+
+<p>Let's use this newfound knowledge to open every .wav file in a folder, and create a TextGrid with an interval tier named "segments" and a point tier named "points", and save them to the same directory. This script will be very useful, so let's try to make it flexible, and easily shareable with non-scripty friends (we'll have them choose the directory). Again, try it out yourself first for maximum fun and learning. Watch out! The list of strings gives you the file names, it doesn't give you a complete path to the files! Also, watch out for which objects are selected when you loop.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+# Let's set the names of the tiers at the 
+# beginning, so that this script will be easier
+# to use in the future
+
+# Actually, we should let the user
+# enter this information with a popup.
+# I'll include this at the end of the 
+# chapter. We'll talk more about that
+# later
+tierNames$ = "segments points"
+pointTiers$ = "points"
+
+inDir$ = chooseDirectory$: "Select folder with your .wav files"
+
+# make sure they made a choice
+if inDir$ == ""
+	exitScript: "No folder given. Exiting"
+endif
+
+inDir$ = inDir$ + "/"
+inDirWild$ = inDir$ + "*.wav"
+
+# Get list of files
+wavList = Create Strings as file list: "wavList", inDirWild$
+
+# See how many there are for the loop
+numFiles = Get number of strings
+
+#if there are no files, we have a problem
+if numFiles == 0
+	exitScript: "I didn't find any .wav files in that folder. Exiting"
+endif
+#  Note that the script exits without error
+#  if the value is zero
+#  If the loop began with:
+#		for i from 1 to 0
+#  It wouldn't throw an error, it would just 
+#  never run
+
+for fileNum from 1 to numFiles
+
+	# I always select objects explicitly
+	# at the beginning of a loop, since
+	# they may not be selected by the end
+	selectObject: wavList
+	wavFile$ = Get string: fileNum
+	wav = Read from file: inDir$ + wavFile$
+
+	textGrid = To TextGrid: tierNames$, pointTiers$
+	
+	# Get the name of the object, use it
+	# to create a file name for the TextGrid
+	objName$ = selected$: "TextGrid"
+	outPath$ = inDir$ + objName$ + ".TextGrid"
+
+	# Since this will be for the "public",
+	# be strict about overwriting files
+	if fileReadable: outPath$
+		pauseScript: objName$ + ".TextGrid" + " exists! Overwrite?"
+	endif
+
+	Save as text file: outPath$
+	
+	# Remove newly opened objects for cleanup
+	selectObject: wav
+	plusObject: textGrid
+	Remove
+endfor
+
+# Remove the wav list
+selectObject: wavList
+Remove
+
+# Tell the user the script ended without error
+pauseScript: "Done! The script ran with no errors."
+</code>
+</pre>
+
+<p>And here's the topmost part of the same script, altered to use a form, to have the user enter the names of the tiers for the TextGrid. We should now have a simple script that anyone could use. Feel free to check out forms in the Praat manual, we'll talk about them more in depth later (in the chapter named <a href="popupWindows">Pop-up windows</a>) since they have their quirks.</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+form Tier information
+	comment Tier names, separated by spaces
+	sentence Tier_names
+	comment Which of these are point tiers?
+	sentence Point_tiers 
+endform
+
+# The tier names can't be empty
+if tier_names$ == ""
+	exitScript: "We need at least one Tier name"
+endif
+
+# Just to keep my naming scheme
+# consistent and not change my working script,
+# I'm going to rename the variables
+tierNames$ = tier_names$
+pointTiers$ = point_tiers$
+</code>
+</pre>
+
+{% include "templates/_footer.njk" %}

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Praat scripting - Files</title>
+
+	<link rel="stylesheet" type="text/css" href="/static/prism.css" />
+	<link rel="stylesheet" type="text/css" href="/static/praatStyle.css" />
+	<link rel="stylesheet" type="text/css" href="/static/headerChunk.css" />
+
+	<script type="text/javascript" src="/static/prism.js"></script>
+</head>
+
+<body>
+
+<div id="headline">
+	<h1 id="headerH1">Praat scripting tutorial</h1>
+	<div id="menuButton">
+		<img id= "menuImage" src="/images/threeBarMenuButton.svg">
+	</div>
+
+	<div id="navDiv" style="visibility:hidden">
+        <nav>
+            
+                <a href="default">Home</a>
+            
+                <a href="infoWindow">Info window</a>
+            
+                <a href="textEditor">Text editor</a>
+            
+                <a href="numVariables">Numeric variables</a>
+            
+                <a href="stringsIntro">String variables</a>
+            
+                <a href="strings2">Strings: continued</a>
+            
+                <a href="boolean">Boolean variables</a>
+            
+                <a href="findingCommands">Praat commands</a>
+            
+                <a href="conditionals">Conditionals</a>
+            
+                <a href="objectSelection">Object selection</a>
+            
+                <a href="loops">Loops</a>
+            
+                <a href="filePaths">File paths</a>
+            
+                <a href="files">Files</a>
+            
+                <a href="loopingThroughFiles">Looping through files</a>
+            
+                <a href="filesExtendedExample">Challenge: Formant script</a>
+            
+                <a href="popupWindows">Popup windows</a>
+            
+                <a href="procedures">Procedures</a>
+            
+                <a href="advancedStrings">Advanced strings</a>
+            
+                <a href="theEnd">The End</a>
+            
+                <a href="downloads">Downloads</a>
+            
+                <a href="contact">Contact</a>
+            
+        </nav>
+	</div>
+
+</div>
+
+
+<div id="mainContent">
+
+<h1>Manipulating files</h1>
+
+<p>Are you excited? Call me what you will, but I was when I finally got my scripts opening files. I had a bunch of folders full of wav files and TextGrids that I had carefully marked up, and I was happy that I could make a script to get and format the numbers for me. Forgot to do something? Edit a line and run the script again. Made a mistake? Run the script again. In a matter of seconds a spreadsheet with thousands of lines could be regenerated. Good times!</p>
+
+<h2>Reading (opening) files</h2>
+
+<p>When you "read" a file, you open it and copy its contents into memory. This means that typically when you read a file, you aren't changing it in any way, until you "write" (though in other programming languages you have to make sure to close the file or bad things can happen, Praat does this for us).</p>
+
+<p> Make sure the object window is showing, and click the Open menu on the top bar. As far as I can tell all of these commands can be used in Praat scripts, taking a path as an argument. Let's keep working with the files in the folder praatTutorial/sampleData/. Build up your path in a smart way, and read in a sound file with the Read from file command. (If you don't have the accompanying files, go to the Download page from the menu above)</p> 
+
+<pre>
+<code class="language-ruby">
+clearinfo
+# here I'll just set up a full path
+
+#Build the path in chunks to make it
+#more flexible and easier to change
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleData/"
+inDir$ = wd$
+
+sound1Path$ = inDir$ + "be.wav"
+sound1 = Read from file: sound1Path$
+</code>
+</pre>
+
+<p>We should now have "Sound be" open and selected, and 'sound1' should contain a reference to its object number. Also check out the commands for reading in spreadsheets, they are VERY useful. Let's say while marking up a file in a TextGrid, I found that I had to adjust the formant settings for different people. Well I could keep a tab-separated spreadsheet of specific settings for those people, and use those values in the script. We're actually going to do that later.</p>
+
+<p>The chapter on files in the Praat Scripting Tutorial is one that I think is actually a bit lacking. Unless I'm mistaken, the "readFile" or "readFile$" commands will read in a text file, and leave the parsing to you. That means that you'll have to manually chop up the file how you wish, which is not a whole lot of fun and not a good use of your time. If you just want to copy the text from a file "wholesale", then "readFile$" is a good thing to know about. Otherwise, the commands in the "Open" menu are much more useful: They will create an object (like a Table object, or a Strings object), and Praat has a bunch of commands we can use to query and modify that information (i.e. What's the value of Column 1 row 2? How many rows are there? etc.)</p>
+
+
+<h2>Open files via GUI: Allow the user to pick the file</h2>
+
+<p>Have we talked about what a GUI is yet? Well, it's a good term to know. It stands for Graphical User Interface, and refers to the windowed point and click environment we're all used to. When you deal with the command line (aka the terminal / console / command prompt), you're interacting with the computer via some type of text entry method. For example, on a Mac, you can double-click an app to open it (the GUI way), or you can open a console and type "open /Applications/Firefox.app". Our scripts up until this point have not used a GUI.</p>
+
+<p>But Praat does give us the option to use a GUI file picker for our scripts with the "chooseReadFile$" command. Again, the dollar sign at the end of its name should indicate that it will return a string, representing the path to the desired file. Note that it just gives us a file path, it doesn't open it for us. We still have to use an appropriate "open" command. Try it out:</p>
+
+<pre>
+<code class="language-ruby">
+# The argument is a message.
+# It should be informative and
+# help the user pick the correct file
+inFile$ = chooseReadFile$: "Open a .wav file"
+
+# check that they chose a file
+if inFile$ &lt;&gt; ""
+	sound = Read from file: inFile$
+else
+	exitScript: "No wav file chosen, quitting"
+endif
+</code>
+</pre>
+
+<p>If we're really going for quality, I would go a step further in the previous example and also check that the file ends in .wav or .WAV, if this is a requirement for my script to work correctly. We'll talk more about string functions like right$ more in a later chapter.</p>
+
+<pre>
+<code class="language-ruby">
+inFile$ = chooseReadFile$: "Open a .wav file"
+
+# check that they chose a file
+fileIsGood = 0
+if inFile$ &lt;&gt; ""
+	#last three characters of file name
+	lastThree$ = right$: inFile$, 3
+	if (lastThree$ == "wav") or (lastThree$ == "WAV")
+		fileIsGood = 1
+	endif
+endif
+
+if fileIsGood
+	sound = Read from file: inFile$
+else
+	exitScript: "No wav file chosen, quitting"
+endif
+
+</code>
+</pre>
+
+<h2>Writing (saving) files, a warning</h2>
+
+<p>The most important thing for the novice programmer to understand is that if you write a file to a path that already exists, it will be overwritten, as in ERASED WITHOUT WARNING, AND WITH NO "UNDO" AVAILABLE. You must therefore be very careful and considerate when writing files.</p>
+
+<p>The first step to avoiding data loss is to back it up in a separate place (on a different machine), and to keep your source data in a different folder from your output files. I would suggest an organization like this:</p>
+
+<pre>
+<code class="language-markup">
+project/
+	myScript.praat
+	data/
+	output/
+</code>
+</pre>
+
+
+<p>The next thing you want to get in the habit of doing is checking if the file exists and asking permission before overwriting it. Praat offers us the 'fileReadable' command, which returns 1 if the file exists, and 0 if it doesn't. It is worth the 30 seconds necessary to code a check like the following every time you are about to write to a file:</p>
+
+<pre>
+<code class="language-ruby">
+outFile$ = outDir$ + "results.csv"
+
+if fileReadable: outFile$
+	pauseScript: "File exists! Overwrite?"
+endif
+</code>
+</pre>
+
+<p>Keep the message short and sweet, because, at least on my machine (Ubuntu, June 2016), the window won't resize to include runoff text with this simple "pauseScript" command (see beginPause for more flexible options).</p>
+
+<p>If I'm in the process of designing a script, I'll be overwriting files constantly (there's no point in saving a file that was output incorrectly, right?), so I'll include an option toward the top of my file to disable the checks, since clicking a bunch of warnings a hundred times a minute is annoying. This is of course more dangerous, so I'd be very careful with this one:</p>
+
+<pre>
+<code class="language-ruby">
+askBeforeDelete = 1
+
+outFile$ = outDir$ + "results.csv"
+
+if askBeforeDelete and fileReadble: outFile$
+	pauseScript: "File exists! Overwrite?"
+endif
+</code>
+</pre>
+
+<h2>Writing files</h2>
+
+<p>Just as above, you can use pretty much all of the commands in the "Save" menu in your scripts. As usual, the save options that are available to us will depend on the object that is selected (i.e. there will be no "Save as WAV file" command if a TextGrid is selected).</p>
+
+<p>We can also use a file picker to write files with chooseWriteFile$, allowing the user to click to a place they want to save. Note that the filepicker will check if the file exists and ask the user to confirm, so we don't have to program it:</p>
+
+<pre>
+<code class="language-ruby">
+selectObject: sound
+
+# First argument is the message
+# Second argument is a suggested 
+# file name
+outPath$ = chooseWriteFile$: "Save to .wav", "monkeySounds.wav"
+if outPath$ &lt;&gt; ""
+	Save as WAV file: outPath$
+endif
+</code>
+</pre>
+
+<h2>Writing text files and spreadsheets</h2>
+
+<p>Something we definitely want to be comfortable with is saving our data to text files. We have a couple of options: <strong>writeFile, writeFileLine, appendFile,</strong> and <strong>appendFileLine</strong>. Remember again that in computer parlance "writing" usually means "open a new file, write data to it and close it", and if there was already a file there, it is gone. The appendFile command will create a new file if it doesn't exist, but if it does it will add your data to the end. Here's an example showing the difference between writeFile and appendFile. The first argument to the command is the path to the file you want to write, and after that you can give it a comma-separated list of strings and/or numbers.</p>
+
+<pre>
+<code class="language-ruby">
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleOutput/"
+
+outFile1$ = wd$ + "outFile1.txt"
+outFile2$ = wd$ + "outFile2.txt"
+
+wMessage$ = "I'm writing, 'I love you'".
+aMessage$ = "I'm appending, 'I love you'".
+
+# let's write the message five times
+for i from 1 to 5
+	writeFile: outFile1$, wMessage$
+endfor
+
+# now we'll append 5 times
+for 1 from 1 to 5
+	appendFile: outFile2$, aMessage$
+endfor
+</code>
+</pre>
+
+<p>Open the files. Does what you see surprise you? If it does, reread the previous paragraph. Close the files, rerun the script, and open them again. Making sense yet?</p>
+
+<p>If you're repeatedly writing data, you will most likely be using "appendFile" more. The only thing to remember in that case is to not keep appending to an old file! Hopefully you noticed this when you ran the script again: "outFile2.txt" has 10 lines, and every time you run the script it will gain 5 more, since we never erased the old file.</p>
+
+<p>You could issue a "writeFile" command first, and use "appendFile" on all subsequent calls to write, but my personal preference is to do my necessary file checks, and after confirming I want to overwrite the file, issue a "deleteFile" command, then only use "appendFile" or "appendFileLine". Note that if the file doesn't exists and you issue "deleteFile", it doesn't throw an error, so this works the first time you run it, too. This is more along the lines of what I would typically do:</p>
+
+<pre>
+<code class="language-ruby">
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleOutput/"
+askBeforeDelete = 1
+
+outFile2$ = wd$ + "outFile2.txt"
+
+if askBeforeDelete and fileReadable: outFile2$
+	pauseScript: "File exists. Overwrite?"
+endif
+deleteFile: outFile2$
+
+aMessage$ = "I'm appending, 'I love you'".
+for i from 1 to 5
+	appendFile: outFile2$, aMessage$
+endfor
+</code>
+</pre>
+
+<p>Now every time we run it, we should see the message five times.</p>
+
+<p>You should also have noted the difference between writeFile and writeFileLine, and appendFile and appendFileLine. The two versions of code below are equivalent:</p>
+
+<pre>
+<code class="language-ruby">
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleOutput/"
+
+outFile2$ = wd$ + "outFile2.txt"
+outFile3$ = wd$ + "outFile3.txt"
+
+aMessage$ = "I'm appending, 'I love you'".
+
+deleteFile: outFile2$
+deleteFile: outFile3$
+
+#version 1
+for i from 1 to 5
+	appendFile: outFile2$, aMessage$, newline$
+endfor
+
+#version 2
+for i from 1 to 5
+	appendFileLine: outFile2$, aMessage$
+endfor
+</code>
+</pre>
+
+<h3>Spreadsheets: Value separated text files</h3>
+
+<p>I'm assuming that most of you use Excel. Though Excel is wonderful in many ways, it's not super programmer-friendly. The problem here is that Excel files save their data in such a way that it is not very easy for other programs to read them. If you want, for fun you could try to open an .xlsx file with a text editor, and see the gibberish it spits out. The developers at Praat haven't written in support for opening and saving .xlsx files because it's a PAIN IN THE ASS and it would be like another job maintaining that code.</p>
+
+<p>A more universal format, although it may be less flexible (no pretty highlighting, sorry), is to use value separated text files. This is a simple text file, but you've decided that you're going to use certain characters as separators, so that when you open it, you can tell the program to treat those as line and column separators. Typically newline characters separate rows, and the more common separators for columns are tabs and commas. Commas are the most common, but I often have data that contains commas (you know, like, for marking pauses and stuff, like I'm doing like, now), so it's not a good choice for me. It is common to use a ".csv" or ".tsv" extension on these files, but they're really just text files.</p>
+
+<h2>RANT</h2>
+
+<p>You can import and export these data into Excel. Unfortunately, and somewhat incredibly, Excel is very bad at this and makes it way more difficult than it has to be. Every time they release a new Excel version, they muck it up and introduce new bugs, and change the number and location of the hoops you have to jump through to open a friggin text file. I leave it to your google skills to figure out how to do it for your version, because I can't even. My personal recommendation would be to download the free office suite LibreOffice. Their spreadsheet app, "Calc", is very good at saving and importing csv files. They even let you save the file in ".xlsx" format if you want to keep working in Excel.</p>
+
+<p>I also have written a simple program in python that will convert a .csv file into xlsx format, so if I get any requests for that, I'll adapt it and add it somewhere on this website.</p>
+
+<h2>ENDRANT</h2>
+
+<p>When you want to write out a spreadsheet in Praat, the way to do it is to create one of these value-separated text files. Supposing I've already deleted any older file of the same name (with permission of course), in this next example we write column names and three lines of data to a spreadsheet. I'm going to include a variable at the top to hold my desired separator, so that if I ever change my mind I only have to change it once:</p>
+
+<pre>
+<code class="language-ruby">
+clearinfo
+
+wd$ = homeDirectory$ + "/Documents/praatTutorial/sampleOutput/"
+
+# I'll use tabs as separator
+sep$ = tab$
+# use this for commas
+#sep$ = ","
+
+outFile4$ = wd$ + "datingProfiles.csv"
+
+# I find it easier to read if I have each
+# column name on a separate line. The 
+# three leading periods tell Praat that
+# the line is part of the previous command
+
+# here are the column names
+header$ = "name" + sep$
+	...+ "profession" + sep$
+	...+ "income" + sep$
+	...+ "likesWalksOnBeach" + sep$
+	...+ "hotness" + sep$
+	...+ "sensitivity" + newline$
+
+appendFile: outFile4$, header$
+
+# note that the numbers I'm writing here
+# are actually strings!
+brian$ = "brian" + sep$
+	...+ "stock trader" + sep$
+	...+ "200000" + sep$
+	...+ "1" + sep$
+	...+ "2" + sep$
+	...+ "5" + newline$
+
+brett$ = "brett" + sep$
+	...+ "trianguleiro" + sep$
+	...+ "30000" + sep$
+	...+ "1" + sep$
+	...+ "9" + sep$
+	...+ "4" + newline$
+
+bob$ = "bob" + sep$
+	...+ "barista" + sep$
+	...+ "60000" + sep$
+	...+ "0" + sep$
+	...+ "4" + sep$
+	...+ "8" + newline$
+
+appendFile: outFile4$, brian$
+appendFile: outFile4$, brett$
+appendFile: outFile4$, bob$
+</code>
+</pre>
+
+<p>Open datingProfiles.csv in your spreadsheet editor, and confirm that it looks right. The above code is just to get you familiarized with writing a spreadsheet. Normally we wouldn't be hand-coding the data rows, we'll write the code once with variables, and they would be populated in a loop. In the chapter that follows, we're going to create a longer script that employs everything we've learned so far.</p>
+
+<h2>Notes</h2>
+
+<p>You can create a folder with "createDirectory". As stated in the manual, if it already exists this command does nothing.</p>
+
+<p>You can use a file picker to get folder names, and to choose a place to save a file:</p>
+
+<pre>
+<code class="language-ruby">
+# ask them to choose a folder
+inDir$ = chooseDirectory$: "Select folder with .wav files"
+
+# ask where to save a file to
+# second argument is a suggested file name
+outPath$ = chooseWriteFile: "Save as a .wav file", "sweetSounds.wav"
+</code>
+</pre>
+
+
+    <p>Next page: <a href="loopingThroughFiles">Looping through files</a></p>
+
+
+</div>
+
+<script type="text/javascript" src="/static/showMenu.js"></script>
+
+<!--
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78683807-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+-->
+
+</body>
+</html>
+

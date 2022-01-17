@@ -1,0 +1,192 @@
+{% include "templates/_header.njk" %}
+
+<div id="mainContent">
+
+<h1>UNDER CONSTRUCTION</h1>
+
+<p>This was written a long time ago and needs to be revised. Send me an email encouraging me to fix it.</p>
+
+<h1>Manipulating and searching for words: More advanced string operations</h1>
+
+<p>We want to get good at dealing with strings. It can be a real pain at first, but getting comfortable with manipulating strings programmatically (regardless of programming language) is a very powerful skill set that will serve you for the rest of your life as a researcher.</p>
+
+
+
+<h3>String functions</h3>
+
+<p>Beyond simply combining strings, Praat has a bunch of really useful functions that we can use to parse and manipulate strings. You could use these, for example, to dynamically create file names, or to separate a complex string like "01-e-23.wav" into smaller parts.</p>
+
+<p>Let's say I ran an experiment using some software like PsychoPy or E-Prime. It's generated a bunch of files, and I want to open up each sound file and do something to it in my script. My folder also contains a bunch of files that are not sound files I'm interested in, so I know there's going to be a part of my script that checks if the file ends in "wav" before asking Praat to open it. Using Praat's built-in string functions I could, for example, get the right 3 characters in a file name and see if they are "wav" by using the right$() function.</p>
+
+<p>Here's the definition of the right$() function from the Praat manual:</p>
+
+<pre>
+<code class="language-ruby">
+
+right$ (a$, n)
+
+	gives a string consisting of the last n characters of a$. 
+</code>
+</pre>
+
+
+<p>Note that in Praat's new syntax, this could also be written as right$: a$, n</p>
+
+<p>Let's get the right three characters of the string "01-e-23.wav", and save it to a variable called ext$:</p>
+
+<pre>
+<code class="language-ruby">
+fil$ = "01-e-23.wav"
+ext$ = right$: fil$, 3
+appendInfoLine: ext$
+</code>
+</pre>
+
+
+<p>Let's look at what this means and carefully understand what's happening. Remember that a "function" in computer languages is basically a series of commands that will give you back a value: you "call" it, possibly giving it "arguments" (elements to act on), and it will "return" a value. Here, the function is the right$: function. It has two arguments: the string to act on (fil$), and the number of characters we want (3). Hopefully you have noted this already, but its first argument is a string, and its second argument is a number. As stated in its definition in the manual, it returns a string, so when we save its return value, we must save it to a string variable with a trailing dollar sign. The following calls to right$() have mistakes in them. Run them and observe the error message, then find the errors and fix them.</p>
+
+<pre>
+<code class="language-ruby">
+ext = right$: fil$, "3"
+ext$ = right: fil, 3
+
+</code>
+</pre>
+
+<p>I don't like how we hard-coded the number three into the call to right$(). What if we want to reuse this script and the files are .aiff files? That file extension has 4 letters, and we would have to run through our script and change all of the (right) threes. Let's "once and done" it. We'll get the length of the extension by using the length() function:</p>
+
+<pre>
+<code class="language-ruby">
+targetExt$ = "wav"
+extLen = length: targetExt$
+
+fil$ = "01-e-23.wav"
+
+ext$ = right$: fil$, extLen 
+appendInfoLine: ext$
+</code>
+</pre>
+
+
+<p>There is an important difference between the length() function, and the one we used to get the rightmost letters. Can you spot it? right$() has a dollar sign after its name, and length() doesn't. That's because, you guessed it, right$ will return a string, and length will return a number. Check out how this is reflected in the variables we used to save the return value (ext$ and extLen). right$() returns a string, so we save it to a string variable (ext$). length() returns a number, so we saved it to a numeric variable (extLen).</p>
+
+<p>Now go to the Praat manual and read the page on string functions. Check out what's available to you. Don't stress too much about things you don't understand (but get curious!). You can use these creatively to parse and analayze strings. </p>
+
+<h3>Practice</h3>
+
+<p>This one's a big task, but it covers pretty much all of the concepts we've been talking about, and is really practical. Your toils will bear good fruit. Recall our example before of wanting to manipulate a bunch of sound files. Going back to our example, we can imagine that our experimental software generated a bunch of names like "1-e-23.wav". The first character represents a condition (condition 1), the "e" represents a target vowel, and the "23" represents a participant number. </p>
+
+<p>Using available string functions, make a script that will print a line to the info window saying "This is participant 23's pronunciation of e in condition 1. It is a wav file".</p>
+
+<pre>
+<code class="language-ruby">
+
+##############################
+
+#1 is the condition
+#"e" is the target vowel
+#23 is the participant number
+fil$ = "1-e-23.wav"
+
+#Here's one way of doing it using 
+#some of Praat's string functions
+
+fil$ = "1-e-23.wav"
+
+condition$ = left$ (fil$, 1)
+vowel$ = mid$ (fil$, 3, 1)
+part$ = mid$ (fil$, 5, 2)
+fileExt$ = right$ (fil$, 3)
+
+appendInfoLine: "This is participant " + part$ + "'s pronunciation of " + vowel$ + " in condition " + condition$ + ". It's a " + fileExt$ + " file."
+
+</code>
+</pre>
+
+<p>This gets the job done, but we should always be thinking ahead and trying to plan for potential errors in the future. We have to understand that this solution has several assumptions: </p>
+
+<ul>
+	<li>I'm hard-coding the number of characters to mess with in the left$ mid$ and right$ functions. This means I must not have more than 9 conditions, or everything will break. Comment out the line for fil$ by adding a hashtag in front of it, and add this line below it, then rerun the script and see what it prints out:</li>
+
+<pre>
+<code class="language-ruby">
+fil$ = "10-e-23.wav" 
+</code>
+</pre>
+
+
+<p>We run into a similar problem if we're using a label for a sound that has more than one character:</p>
+
+<pre>
+<code class="language-ruby">
+fil$ = "1-sh-23.wav"
+</code>
+</pre>
+
+<li>What if our files have names instead of participant numbers? Not everybody has the same length name. We should always be on the lookout for ways of future-proofing our code, and making it more generalizeable. Maybe in this case, it would be more flexible to treat the hyphens as separators, and allow for values of different lengths.</li>
+</ul>
+
+
+<p>Now let's make a more flexible script to parse our file names. It still has assumptions, though: it assumes that the file name has two hyphens, and that it has a file extension. The improvement is that the components between these can be any length.</p>
+
+<pre>
+<code class="language-ruby">
+#filename structure:
+#condition-targetSound-participant.extension
+
+#find the index (location) of the first hyphen:
+hy1 = index(fil$, "-")
+
+#calculate the number to give to the left$() function based on this
+# We want all the characters before it, or (index - 1) characters.
+# If index were 3, we want the first two characters
+cond$ = left$ (fil$, hy1 - 1)
+
+#index of second (last) hyphen, by searching from the right using Praat's right index
+hy2 = rindex(fil$, "-")
+
+##Get the target sound by extracting the characters between
+##the left and right hyphen.
+# The beginning index of the sound is one place after the first hyphen
+soBeg = hy1 + 1
+
+#We need to know how many characters to extract for the mid function.
+#Subtract hy2 from hy1, then one more
+numCharsVowel = hy2 - hy1 - 1
+vowel$ = mid$ (fil$, soBeg, numCharsVowel)
+
+#We can find the location of the period, and use the same method 
+#above to extract the participant number
+dot = rindex(fil$, ".")
+partBeg = hy2 + 1
+numCharsPart = dot - hy2 - 1
+part$ = mid$ (fil$, partBeg, numCharsPart)
+
+##let's allow for file extensions that might be longer than three characters, 
+## like .Collection or .TextGrid
+
+#We already know where the rightmost period is
+# We can get the length of the file name, and 
+# calculate how long the extension is by substracting
+# the index of the last period
+strLen = length (fil$)
+extLen = strLen - dot
+fileExt$ = right$ (fil$, extLen)
+
+writeInfoLine: "This is participant " + part$ + "'s pronunciation of " + vowel$ + " in condition " + cond$ + ". It's a " + fileExt$ + " file."
+
+</code>
+</pre>
+
+
+<p>We've now made a script that can take apart a file name that has a file extension and has two hyphens. Comment out what we have for fil$, and add some more names, trying to break the script. Try "13A-shibboleth-Frankie.TextGrid", for example.</p>
+
+<p>Of course there is plenty of room for improvement, but I hope this showed that we can get pretty creative with Praat's built-in string functions.</p>
+
+<p>I also want to reiterate a couple of habits that I think you should get into. Before I went around looping through files, we tested this idea on its own, in an isolated test script. This simplifies our life.</p>
+
+<p>We commented our thinking throughout the steps of the scripts. When we come back to this script after a good while, this will help us quickly remember what we were trying to do. Trust me, when you're dealing with a challenging problem and spent a lot of time working it through, you probably won't remember all of the logical leaps you took after a few weeks. This will save you a lot of time later and makes your script more understandable to others.</p>
+
+<p>If you do ever get more into programming, the next step for dealing with strings is learning about regular expressions (regex). They're basically their own mini language that you can use to parse strings in very complex ways. The truth is they are a major pain in the ass if you're not using them regularly, because they are really hard for humans to read. But I don't know of a better alternative, and practically every good language lets you use them, including Praat. So if you get heavy into searching through text, go learn about regular expressions, but put on your patient cap before starting. Just be content that what you learn will transfer over to any programming language you will learn in the future. If you're into database work, you will need to get good at regexes.</p>
+
+{% include "templates/_footer.njk" %}
