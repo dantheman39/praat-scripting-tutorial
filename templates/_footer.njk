@@ -1,4 +1,6 @@
-<p>Next page: <a href="{{ nextPage.name }}">{{ nextPage.humanName }}</a></p>
+{% if nextPage.name %}
+    <p>Next page: <a href="{{ nextPage.name }}">{{ nextPage.humanName }}</a></p>
+{%  endif %}
 
 </div>
 

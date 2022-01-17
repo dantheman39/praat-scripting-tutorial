@@ -2,16 +2,19 @@
   "name": "praatscripting",
   "version": "1.0.0",
   "description": "Praat Scripting Tutorial Website",
-  "main": "index.js",
   "author": "Daniel Riggs <daniel.riggs1@gmail.com>",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node index.js && node devServer.js",
-    "build": "node index.js"
+    "start": "nodemon --ext js,css,njk index.js",
+    "build": "node compileTemplates.js",
+    "clean": "rm html/*"
   },
   "dependencies": {
     "express": "^4.17.2",
     "nunjucks": "^3.2.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

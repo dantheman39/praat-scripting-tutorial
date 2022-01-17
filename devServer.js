@@ -28,5 +28,13 @@ app.get("*", (req, res) => {
     res.sendStatus(404);
 });
 
-console.log(`Listening on port ${port}`);
-app.listen(port);
+const runServer = () => {
+    console.log(`Listening on port ${port}`);
+    app.listen(port);
+};
+
+module.exports = runServer;
+
+if (require.main === module) {
+    runServer();
+}
