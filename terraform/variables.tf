@@ -7,3 +7,7 @@ variable "lambda_function_name" {
   type    = string
   default = "send_contact_email"
 }
+
+variable "email_address" {
+  type    = string
+}

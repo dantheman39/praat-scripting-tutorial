@@ -3,17 +3,19 @@
 This is the source code for praatscriptingtutorial.com.
 
 It's an old project so I'm not spending a ton of time making this all very pretty.
+I _am_ using it as a bit of playground for learning more about deployment and cloud
+infrastructure.
 
 At time of writing, I'm migrating this content from a Django app I wrote in 2016,
 to be a very simple static site served from s3. There are of course a lot of ways
 this site (and the content) could be improved, but I'm favoring my own learning
 more devops-y things like serving a static site from s3, and having a repeatable
-deployment process (getting some terraform practice, for example). Since this is
+deployment process (getting some more terraform practice, for example). Since this is
 an old project, I haven't yet added some niceties like linting, prettier, typescript,
 etc., as these are things I already know how to do.
 
 Before I cut over from my old Django deployment, I still have more to do (CNAME
-migrations, SSL certs), before I cut this over, but it's very possible I'll get
+migrations, SSL certs), but it's very possible I'll get
 distracted and not follow through for a while ...
 
 # If you're a linguist and want to suggest a change
@@ -55,7 +57,7 @@ See `package.json::scripts` for other available scripts.
 ## WIP use API gateway and lambda function to allow users to submit a contact form
 
 This is just getting underway. So far I've been able to successfully build a hello-world
-lambda function via a container, which is built and pushed to ECR via terraform.
+lambda function via a container, which is built and pushed to ECR with terraform.
 
 A summary from the AWS docs for some dev tips:
 

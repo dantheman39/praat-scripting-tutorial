@@ -38,6 +38,21 @@ resource "aws_iam_policy" "send_contact_email_lambda" {
         Resource : [
           "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.lambda_function_name}:*",
         ]
+      },
+      {
+        Effect : "Allow",
+        Action : [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ],
+        Resource : "*",
+        Condition: {
+          "ForAllValues:StringLike":{
+            "ses:Recipients":[
+              var.email_address
+            ]
+          }
+        }
       }
     ]
   })
