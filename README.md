@@ -52,6 +52,24 @@ to refresh your browser to view them).
 
 See `package.json::scripts` for other available scripts.
 
+## WIP use API gateway and lambda function to allow users to submit a contact form
+
+This is just getting underway. So far I've been able to successfully build a hello-world
+lambda function via a container, which is built and pushed to ECR via terraform.
+
+A summary from the AWS docs for some dev tips:
+
+### Run built image locally and send an event
+
+```
+cd send_contact_email
+docker build -t send-contact-email .
+docker run -p 9000:8080 -t send-contact-email
+
+# in another terminal window
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+```
+
 ## Deploying
 
 I deploy this to my AWS account using terraform. At time of writing no one except

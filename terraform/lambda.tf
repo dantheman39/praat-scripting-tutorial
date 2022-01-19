@@ -1,4 +1,5 @@
 resource "aws_lambda_function" "send_contact_email" {
+  depends_on    = [null_resource.ecr_image]
   function_name = var.lambda_function_name
   role          = aws_iam_role.send_contact_email_lambda.arn
   package_type  = "Image"
