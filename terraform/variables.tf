@@ -13,9 +13,9 @@ variable "lambda_function_name" {
 }
 
 variable "email_address" {
-  type    = string
+  type = string
 }
 
 variable "cloudflare_api_token" {
-  type    = string
+  type = string
 }

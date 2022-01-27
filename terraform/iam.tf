@@ -46,9 +46,9 @@ resource "aws_iam_policy" "send_contact_email_lambda" {
           "ses:SendRawEmail"
         ],
         Resource : "*",
-        Condition: {
-          "ForAllValues:StringLike":{
-            "ses:Recipients":[
+        Condition : {
+          "ForAllValues:StringLike" : {
+            "ses:Recipients" : [
               var.email_address
             ]
           }

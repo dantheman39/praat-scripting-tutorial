@@ -1,5 +1,5 @@
 resource "cloudflare_zone" "domain" {
-  zone    = var.domain
+  zone = var.domain
 }
 
 

@@ -22,7 +22,7 @@ resource "null_resource" "ecr_image_build" {
 }
 
 data "aws_ecr_image" "ecr_image" {
-  depends_on = [null_resource.ecr_image_build]
+  depends_on      = [null_resource.ecr_image_build]
   repository_name = aws_ecr_repository.send_contact_email.name
-  image_tag = "latest"
+  image_tag       = "latest"
 }
