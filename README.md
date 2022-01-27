@@ -2,13 +2,13 @@
 
 This is the source code for praatscriptingtutorial.com.
 
-It's an old project so I'm not spending a ton of time making this all very pretty.
+It's an old project so I'm not spending a ton of time making the site itself very pretty.
 I _am_ using it as a bit of playground for learning more about deployment and cloud
 infrastructure.
 
 At time of writing, I'm migrating this content from a Django app I wrote in 2016,
 to be a very simple static site served from s3. There are of course a lot of ways
-this site (and the content) could be improved, but I'm favoring my own learning
+this site (and the content) could be improved, but I'm favoring my own learning of
 more devops-y things like serving a static site from s3, and having a repeatable
 deployment process (getting some more terraform practice, for example). Since this is
 an old project, I haven't yet added some niceties like linting, prettier, typescript,
