@@ -1,9 +1,19 @@
 resource "aws_s3_bucket" "bucket" {
-  bucket = "praat-scripting-tutorial"
+  bucket = var.domain
   acl    = "public-read"
 
   website {
     index_document = "infoWindow"
+  }
+}
+
+resource "aws_s3_bucket" "www" {
+  bucket = "www.${var.domain}"
+  acl    = "private"
+  policy = ""
+
+  website {
+    redirect_all_requests_to = "https://${var.domain}"
   }
 }
 
@@ -68,10 +78,12 @@ resource "aws_s3_bucket_object" "svg" {
 }
 
 resource "aws_s3_bucket_object" "zip" {
+  # note that this will not detect changes to this file.
+  # either taint this or come up with a naming scheme
+  # for the zip file
   for_each     = fileset("../downloads/", "*.zip")
   bucket       = aws_s3_bucket.bucket.id
   key          = "downloads/${each.value}"
   source       = "../downloads/${each.value}"
-  etag         = filemd5("../downloads/${each.value}")
   content_type = "application/zip"
 }
