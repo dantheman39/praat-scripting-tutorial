@@ -1,8 +1,3 @@
-data "cloudflare_zones" "domain" {
-  filter {
-    name = var.domain
-  }
-}
 resource "cloudflare_zone" "domain" {
   zone    = var.domain
 }
