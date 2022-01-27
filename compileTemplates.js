@@ -27,6 +27,8 @@ const pageData = [
 
 const excludeFromNext = ["downloads", "contact"];
 
+const DEBUG = process.env.DEBUG === "true";
+
 const compileTemplates = () => {
     console.log("Compiling templates");
     const numPages = pageData.length;
@@ -46,7 +48,7 @@ const compileTemplates = () => {
         console.log("    ", name);
         const html = nunjucks.render(
             `templates/${name}.njk`,
-            { title, pageData, nextPage },
+            { title, pageData, nextPage, debug: DEBUG },
         );
         fs.writeFileSync(`html/${name}.html`, html);
     }
