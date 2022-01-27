@@ -24,3 +24,11 @@ resource "cloudflare_record" "www" {
   ttl     = 1
   proxied = true
 }
+
+resource "cloudflare_page_rule" "https" {
+  zone_id = cloudflare_zone.domain.id
+  target  = "*.${var.domain}/*"
+  actions {
+    always_use_https = true
+  }
+}
