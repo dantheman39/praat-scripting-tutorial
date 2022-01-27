@@ -14,10 +14,6 @@ deployment process (getting some more terraform practice, for example). Since th
 an old project, I haven't yet added some niceties like linting, prettier, typescript,
 etc., as these are things I already know how to do.
 
-Before I cut over from my old Django deployment, I still have more to do (CNAME
-migrations, SSL certs), but it's very possible I'll get
-distracted and not follow through for a while ...
-
 # If you're a linguist and want to suggest a change
 
 You can open an issue on this repository, or open a pull request. Note that
